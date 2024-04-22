@@ -1,0 +1,135 @@
+// .Show {
+//   display: flex;
+//   // flex-direction: row;
+//   padding: 5px;
+// }
+//   .edit-button {
+//     text-align: right;
+//   }
+
+.headline{
+  margin-left: 10px;
+  margin-right: 10px;
+  height: 10%;
+}
+
+
+.selectall-div {
+  display: flex;
+  // height: 30px;
+  // height: 8.5%;
+  height: 5vh;
+  width: 100%;
+  padding-left: 20px;
+
+  // width: 842px;
+  background-color: #B6CADD;
+  // margin-left: 10px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+.select-all {
+  align-content: center;
+  
+  input[type="checkbox"] {
+    margin-left: 5px;
+  }
+
+  select {
+    margin-left: 10px;
+    border-radius: 5px;
+  }
+}
+
+
+  .checklist-container {
+    // background-color: aqua;
+    // height: 90%;
+    height: 49vh;
+
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px 20px;
+    padding-top: 10px;
+    // margin-left: 10px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    box-shadow:0px 2px 2px #ccc;
+    background-color: #fff;
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .checklist-checkbox {
+      margin-right: 10px;
+    }
+    .checklist-select {
+      margin-left: 10px;
+      border-radius: 5px;
+    }
+    .hr-style {
+      border: 0;
+      border-top: 2px solid #e7e9ec;
+    }
+  }
+
+.test-items-div {
+  height: 85%;
+  border: 1px solid #B6CADD;
+  border-radius: 10px;
+  // background-color: red;
+}
+
+.test-items-title-div {
+  display: flex;
+  justify-content: space-between;
+  background-color: #B6CADD;
+  height: 100%;
+  align-items: center;
+  border-top-left-radius: 10px;
+  border-top-right-radius : 10px;
+  // padding-left: 10px;
+  // padding-right : 10px;
+  text-align: center;
+}
+
+.test-items-title-text {
+  width: 18%;
+}
+
+.test-items-body-div {
+  height: 85%;
+  overflow-y: auto;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  box-shadow: 0px 2px 2px #ccc;
+  background-color: #fff;
+}
+
+.test-items-body-each-div {
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+  align-items: center;
+  margin-top: 15px;
+  height: 30px;
+  // padding-left: 5px;
+  // padding-right: 5px;
+}
+
+.test-items-body-each-text {
+  width: 16%;
+}
+
+.return-results-div {
+  // height: 18vh;
+  // height:85%;
+  height: 100%;
+  overflow-y: auto;
+  border-radius: 10px;
+  box-shadow: 0px 2px 2px #ccc;
+  border: 1px solid #B6CADD;
+  background-color: #fff;
+}

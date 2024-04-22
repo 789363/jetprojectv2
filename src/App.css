@@ -1,0 +1,46 @@
+.AllHeaderDiv {
+  min-height: 10vh;
+  margin-left: -15px;
+  margin-right: -15px;
+}
+.HeaderDiv {
+  height: 10vh;
+  background-color: #3668A4;
+  display: flex;
+  justify-content: space-between;
+  color: white;
+  padding: 0 10px ;
+  align-items: center;
+
+}
+.HeaderDiv1 {
+  display: flex;
+}
+.HeaderTitle1 {
+  /* background-color: burlywood; */
+  font-size: 32px;
+  align-content: center;
+  cursor: pointer;
+}
+.HeaderInfoDiv {
+  /* background-color: red; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 6px;
+}
+.HeaderTitle2T {
+  background-color: burlywood;
+  font-size: 32px;
+  align-content: center;
+}
+.HeaderTitle2C {
+  /* text-align: center; */
+  background-color: gray;
+  font-size: 18px;
+  /* align-items: center; */
+  /* justify-content: center; */
+  /* justify-items: center; */
+  align-content: center;
+}
