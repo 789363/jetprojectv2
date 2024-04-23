@@ -90,63 +90,71 @@ const App = () => {
     );
   };
 
-  // 處理按下Enter鍵的事件(輸入完Header資訊)
-  const handleKeyPress = (event, headerListsItem) => {
-    // 按下Enter鍵，判斷是否有輸入完所有header欄位，OPID長度是6、MachineID長度是4、LineName長度是4，SN不能為空值
-    if (event.key === "Enter") {
-      const { headertitle, headervalue } = headerListsItem;
-      switch (headertitle) {
-        case "OPID":
-          if (headervalue.length !== 6) {
-            alert("OPID長度必須為6");
-          }
-          break;
-        case "MachineID":
-          if (headervalue.length !== 4) {
-            alert("MachineID長度必須為4");
-          }
-          break;
-        case "LineName":
-          if (headervalue.length !== 4) {
-            alert("LineName長度必須為4");
-          }
-          break;
-        case "SN":
-          if (headervalue === "") {
-            alert("SN不能為空值");
-          }
-          break;
-        default:
-          break;
-      }
+  // 處理按鍵事件的函數，尤其是處理 "Enter" 鍵
+const handleKeyPress = async (event, headerListsItem) => {
+  if (event.key === "Enter") {
+    const { headertitle, headervalue } = headerListsItem;
 
-      // 若都正確則setCanUsePage為true
-      if (
-        headerListsItems.filter(
-          (headerListsItem) =>
-            headerListsItem.headertitle === "OPID" &&
-            headerListsItem.headervalue.length === 6
-        ).length > 0 &&
-        headerListsItems.filter(
-          (headerListsItem) =>
-            headerListsItem.headertitle === "MachineID" &&
-            headerListsItem.headervalue.length === 4
-        ).length > 0 &&
-        headerListsItems.filter(
-          (headerListsItem) =>
-            headerListsItem.headertitle === "LineName" &&
-            headerListsItem.headervalue.length === 4
-        ).length > 0 &&
-        headerListsItems.filter(
-          (headerListsItem) =>
-            headerListsItem.headertitle === "SN" &&
-            headerListsItem.headervalue !== ""
-        ).length > 0
-      ) {
-        setCanUsePage(true);
+    // 初始條件設置
+    let url = "";
+    let isValid = false;
+
+    // 根據輸入的標題選擇合適的API路徑和驗證條件
+    switch (headertitle) {
+      case "OPID":
+        isValid = headervalue.length === 6;  // 確認OPID長度是否為6
+        url = `http://localhost:3000/api/headers/${headervalue}`;
+        break;
+      case "MachineID":
+        isValid = headervalue.length === 4;  // 確認MachineID長度是否為4
+        url = `http://localhost:3000/api/machines/${headervalue}`;
+        break;
+      case "LineName":
+        isValid = headervalue.length === 4;  // 確認LineName長度是否為4
+        url = `http://localhost:3000/api/lines/${headervalue}`;
+        break;
+      case "SN":
+        isValid = headervalue !== "";        // 確認SN不為空
+        break;
+      default:
+        return; // 對於其他標題無操作
+    }
+
+    // 如果驗證不通過，彈出警告
+    if (!isValid) {
+      alert(`${headertitle}格式不正確或長度不符合要求`);
+      return;
+    }
+
+    // 如果URL已設定，則發起API請求
+    if (url) {
+      try {
+        const response = await fetch(url, {
+          method: 'GET',  // GET請求
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.exists) {  // 假設後端返回的數據中有一個 'exists' 屬性
+            setMessages([...messages, `${headertitle} 認證存在於資料庫中。`]);
+            // 進一步的應用邏輯處理
+          } else {
+            alert(`${headertitle} 不存在於資料庫中。`);
+          }
+        } else {
+          throw new Error('Network response was not ok.');
+        }
+      } catch (error) {
+        console.error('Fetch error:', error);
+        alert('在檢查資料庫時發生錯誤。');
       }
     }
-  };
+  }
+};
+
 
   const getShowInfo = (data) => {
     // console.log(data, "data");
