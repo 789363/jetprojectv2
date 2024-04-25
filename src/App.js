@@ -90,68 +90,78 @@ const App = () => {
     );
   };
 
-  // 處理按鍵事件的函數，尤其是處理 "Enter" 鍵
+  // 處理按下Enter鍵的事件(輸入完Header資訊)
   const handleKeyPress = async (event, headerListsItem) => {
     if (event.key === "Enter") {
       const { headertitle, headervalue, id } = headerListsItem;
-  
-      let url = "";
+      let url = '';
       let isValid = false;
   
+      // 根据字段类型设置验证逻辑和API URL
       switch (headertitle) {
         case "OPID":
           isValid = headervalue.length === 6;
-          url = `http://localhost:3000/api/ops/${headervalue}`;
+          url = isValid ? `http://localhost:3000/api/ops/${headervalue}` : '';
           break;
         case "MachineID":
           isValid = headervalue.length === 4;
-          url = `http://localhost:3000/api/machines/${headervalue}`;
+          url = isValid ? `http://localhost:3000/api/machines/${headervalue}` : '';
           break;
         case "LineName":
           isValid = headervalue.length === 4;
-          url = `http://localhost:3000/api/lines/${headervalue}`;
+          url = isValid ? `http://localhost:3000/api/lines/${headervalue}` : '';
+          break;
+        case "ProductName":
+          // 如果ProductName需要特别处理，添加逻辑
+          isValid = true; // 通常不锁定，除非特别要求
           break;
         default:
-          return;
+          isValid = true; // 默认其它字段为有效，不进行API验证
       }
   
       if (!isValid) {
-        alert(`${headertitle}格式不正確或長度不符合要求`);
-        return;
-      }
-  
-      if (url) {
+        alert(`${headertitle} 格式不正確請再次確認`);
+      } else if (url) {
+        // 进行API调用以验证字段值
         try {
-          const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
-  
+          const response = await fetch(url);
           if (response.ok) {
-            const data = await response.json();
-            setMessages([...messages, `${headertitle} 認證存在於資料庫中。`]);
-  
-            // 鎖定輸入框
-            setHeaderListsItems((prevItems) =>
-              prevItems.map((item) =>
-                item.id === id ? { ...item, isDisabled: true } : item
-              )
+            // API验证通过
+            setMessages(prev => [...prev, `${headertitle} 通過驗證。`]);
+            // 锁定该输入框
+            setHeaderListsItems(items =>
+              items.map(item => item.id === id ? { ...item, isDisabled: true } : item)
             );
-  
+            // 检查是否所有必要字段都已通过验证
+            checkAllFieldsValidated();
           } else {
-            throw new Error('Network response was not ok.');
+            alert(`${headertitle} 確認數據存在。`);
           }
         } catch (error) {
           console.error('Fetch error:', error);
-          alert('資料不存在，請重新確認後輸入');
+          alert('請確認數據正確。');
         }
+      } else {
+        // 对于不需要API验证的字段，仍然可以在这里锁定
+        if (headertitle === "ProductName") {
+          // 如果ProductName应当在特定条件下锁定
+          setHeaderListsItems(items =>
+            items.map(item => item.id === id ? { ...item, isDisabled: true } : item)
+          );
+        }
+        // 检查是否所有必要字段都已通过验证
+        checkAllFieldsValidated();
       }
     }
   };
-  
-  
+
+  const checkAllFieldsValidated = () => {
+    const allValidated = headerListsItems.every(item =>
+      (["OPID", "MachineID", "LineName"].includes(item.headertitle) && item.isDisabled) ||
+      !["OPID", "MachineID", "LineName"].includes(item.headertitle)
+    );
+    setCanUsePage(allValidated);
+  };
 
   const getShowInfo = (data) => {
     // console.log(data, "data");
