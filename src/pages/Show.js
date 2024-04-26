@@ -5,78 +5,7 @@ import ModelPage from "../components/ModelPage";
 
 const Show = (pros) => {
   const { getShowInfo, toggleShowSet, enteredOPID } = pros;
-
-  const modelList = [
-    {
-      modelId: 1,
-      modelName: "Model01",
-      canEditOPID: ["123456", "222222"],
-    },
-    {
-      modelId: 2,
-      modelName: "Model02",
-      canEditOPID: ["222222"],
-    },
-    {
-      modelId: 3,
-      modelName: "Model03",
-      canEditOPID: ["333333"],
-    },
-  ];
-
   //   測量項目的內容有TestItem、USL、CL、LSL、Unit、測量結果(要自己手動輸入)、測量結果是否合格(要自己手動輸入)、測量結果是否合格
-  const measureItems = [
-    {
-      id: 1,
-      text: "TestItem1",
-      USL: 10,
-      CL: 5,
-      LSL: 0,
-      Unit: "mm",
-      measureResult: "",
-      measureResultIsPass: "",
-    },
-    {
-      id: 2,
-      text: "TestItem2",
-      USL: 10,
-      CL: 5,
-      LSL: 0,
-      Unit: "mm",
-      measureResult: "",
-      measureResultIsPass: "",
-    },
-    {
-      id: 3,
-      text: "TestItem3",
-      USL: 10,
-      CL: 5,
-      LSL: 0,
-      Unit: "mm",
-      measureResult: "",
-      measureResultIsPass: "",
-    },
-    {
-      id: 4,
-      text: "TestItem4",
-      USL: 10,
-      CL: 5,
-      LSL: 0,
-      Unit: "mm",
-      measureResult: "",
-      measureResultIsPass: "",
-    },
-    {
-      id: 5,
-      text: "TestItem5",
-      USL: 10,
-      CL: 5,
-      LSL: 0,
-      Unit: "mm",
-      measureResult: "",
-      measureResultIsPass: "",
-    },
-  ];
 
 
 
@@ -86,7 +15,7 @@ const Show = (pros) => {
   const [selectModel, setSelectModel] = useState(0);
 
   //針對測量項目的動作
-  const [measureListItems, setMeasureListItems] = useState(measureItems);
+  const [measureListItems, setMeasureListItems] = useState([]);
   // 開始測試時間
   // const [startTestTime, setStartTestTime] = useState("");
 
@@ -153,35 +82,37 @@ const Show = (pros) => {
   };
 
   // selectModel的下拉式選單
-  const handleSelectModelChange = (e) => {
+  const handleSelectModelChange = async (e) => {
     const selectedModelId = Number(e.target.value);
     console.log("Selected Model ID:", selectedModelId);
     setSelectModel(selectedModelId);
 
-    // 如果 selectedModelId 为 0，则不执行任何操作，直接返回
+    // 如果选择了‘请选择模型’选项，清空测量项
     if (selectedModelId === 0) {
-        setMeasureListItems([]);  // 可以选择清空当前的检查项列表或保持前一个状态
+        setMeasureListItems([]);  // 清空项
         return;  // 提前退出函数
     }
 
-    // 假设已有数据，例如从其他组件或者上层组件传递下来
-    const checkItemData = modelListsItems.find(model => model.modelId === selectedModelId);
-
-    // 检查数据是否存在，模拟结构如下所示
-    if (checkItemData) {
-        const formattedCheckItem = {
-            id: checkItemData.modelId,
-            text: checkItemData.modelName,
-            description: "Description for " + checkItemData.modelName,
+    // 调用后端API获取测试项
+    try {
+        const response = await fetch(`http://localhost:3000/api/items/${selectedModelId}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const items = await response.json();
+        setMeasureListItems(items.map(item => ({
+            id: item.item_id, // 保持一致性，使用 item_id 而不是 id
+            text: item.item_name, // 确保字段名称匹配
+            USL: item.USL,
+            CL: item.CL,
+            LSL: item.LSL,
+            Unit: item.unit.replace(/\"/g, ''), // 去除额外的引号
             measureResult: "",
-            measureResultIsPass: "",
-            is_critical: false  // 假设为静态值
-        };
-        setMeasureListItems([formattedCheckItem]);  // 更新状态以显示当前选中的模型信息
-    } else {
-        // 仅当 selectedModelId 不为 0 且找不到数据时才显示错误
-        console.error('Model data not found for ID:', selectedModelId);
-        alert('Model data not found');
+            measureResultIsPass: ""
+        })));
+    } catch (error) {
+        console.error('Failed to fetch measure items:', error);
+        alert('Failed to load measure items: ' + error.message);  // 提供给用户的反馈
     }
 };
 
@@ -227,9 +158,6 @@ const Show = (pros) => {
     <option key={model.modelId} value={model.modelId}>{model.modelName}</option>
   ))}
 </select>
-
-            
-
             <button
               type="button"
               class="btn btn-info"
