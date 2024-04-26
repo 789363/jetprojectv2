@@ -78,8 +78,10 @@ const Show = (pros) => {
     },
   ];
 
+
+
   //針對checkList(操作員要做什麼事情)的動作
-  const [modelListsItems, setModelListsItems] = useState(modelList);
+  const [modelListsItems, setModelListsItems] = useState([]);
   // 選擇哪個model的下拉式選單
   const [selectModel, setSelectModel] = useState(0);
 
@@ -93,7 +95,25 @@ const Show = (pros) => {
   //   const formattedTime = formatDateTime(now);
   //   setStartTestTime(formattedTime);
   // }, []);
-
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/modules');
+        if (!response.ok) throw new Error('Failed to fetch models');
+        const models = await response.json();
+        setModelListsItems(models.map(model => ({
+          modelId: model.module_id,
+          modelName: model.module_name,
+          canEditOPID: [enteredOPID]  // 假設每個模型都可以由 enteredOPID 編輯
+        })));
+      } catch (error) {
+        console.error('Fetch models error:', error);
+        alert('無法從後端獲取模型資料，請檢查網絡連接。');
+      }
+    };
+  
+    fetchModels();
+  }, [enteredOPID]);  // 依賴於 enteredOPID，以確保它變化時重新加載數據
   // // 將日期時間格式化為 yyyy-mm-dd hh:mm:ss
   const formatDateTime = (date) => {
     return (
@@ -169,26 +189,17 @@ const Show = (pros) => {
           >
             {/* selectModel的下拉式選單，預設選項為-----請選擇Model------，onChange呼叫handleSelectModelChange事件去setSelectModel*/}
             <select
-              value={selectModel}
-              onChange={handleSelectModelChange}
-              style={{
-                height: "40px",
-                borderRadius: "10px",
-                border: "1px solid #ccc",
-                fontSize: "20px",
-                paddingLeft: "10px",
-                marginRight: "10px",
-              }}
-            >
-              <option value={0}>-----請選擇Model------</option>
-              {modelListsItems
-                .filter((model) => model.canEditOPID.includes(enteredOPID))
-                .map((model) => (
-                  <option key={model.modelId} value={model.modelId}>
-                    {model.modelName}
-                  </option>
-                ))}
-            </select>
+  value={selectModel}
+  onChange={handleSelectModelChange}
+  style={{ height: "40px", borderRadius: "10px", border: "1px solid #ccc", fontSize: "20px", paddingLeft: "10px", marginRight: "10px" }}
+>
+  <option value={0}>-----請選擇Model------</option>
+  {modelListsItems.map((model) => (
+    <option key={model.modelId} value={model.modelId}>{model.modelName}</option>
+  ))}
+</select>
+
+            
 
             <button
               type="button"
