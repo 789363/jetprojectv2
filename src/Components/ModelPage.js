@@ -3,98 +3,7 @@ import "../style/show.scss";
 
 const ModelPage = (pros) => {
   const { selectModel } = pros;
-  const [checkLists, setCheckLists] = useState([
-    {
-      id: 1,
-      text: "No wrong, missing, reverse, damaged, broken, extra part,...",
-      status: "NA",
-      reasons: ["Reason 1-1", "Reason 1-2", "Reason 1-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 2,
-      text: "No extra flux PCBA surface or solder dreg on PCBA surface",
-      status: "NA",
-      reasons: ["Reason 2-1", "Reason 2-2", "Reason 2-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 3,
-      text: "No scratch, surface blister, voids, oxiding, peel off,...",
-      status: "NA",
-      reasons: ["Reason 3-1", "Reason 3-2", "Reason 3-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 4,
-      text: "Connect direction correct way, including: damage,...",
-      status: "NA",
-      reasons: ["Reason 4-1", "Reason 4-2", "Reason 4-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 5,
-      text: "Function test",
-      status: "NA",
-      reasons: ["Reason 5-1", "Reason 5-2", "Reason 5-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 6,
-      text: "The content in the label must be right place, complete, clear ...",
-      status: "NA",
-      reasons: ["Reason 6-1", "Reason 6-2", "Reason 6-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 7,
-      text: "Product packing specification verification",
-      status: "NA",
-      reasons: ["Reason 7-1", "Reason 7-2", "Reason 7-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 8,
-      text: "The label in the right position and direction, clear to verify and ...",
-      status: "NA",
-      reasons: ["Reason 8-1", "Reason 8-2", "Reason 8-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 9,
-      text: "The label in the right position and direction, clear to verify and ...",
-      status: "NA",
-      reasons: ["Reason 9-1", "Reason 9-2", "Reason 9-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 10,
-      text: "The label in the right position and direction, clear to verify and ...",
-      status: "NA",
-      reasons: ["Reason 10-1", "Reason 10-2", "Reason 10-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-  ]);
+  const [checkLists, setCheckLists] = useState([]); 
 
   //checkList的全選
   const [selectAll, setSelectAll] = useState(false);
@@ -103,8 +12,46 @@ const ModelPage = (pros) => {
   const [selectAllValue, setSelectAllValue] = useState("NA");
 
   useEffect(() => {
-    // GETselectModel的checkLists
-  }, []);
+    // 只有当 selectModel 是有效且特定非默认值时才执行 fetch
+    if (selectModel && selectModel !== '0') {  // 假设 '0' 是“-----Modal----”的值
+        const fetchCheckLists = async () => {
+            try {
+                const response = await fetch(`http://localhost:3000/api/checkitems/${selectModel}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    setCheckLists(data.map(item => ({
+                        ...item,
+                        selectedReason: "NA",
+                        disabledReason: true,
+                        checked: false,
+                        status: "NA"
+                    })));
+                } else if (data && typeof data === 'object') {
+                    setCheckLists([{
+                        ...data,
+                        selectedReason: "NA",
+                        disabledReason: true,
+                        checked: false,
+                        status: "NA"
+                    }]);
+                } else {
+                    console.error('Data format error: Expected an object or an array but got:', data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch checklists:', error);
+                
+                alert('Failed to load check items: ' + error.message);
+            }
+        };
+        fetchCheckLists();
+    } else {
+        // 当选择是 "-----Modal----" 或其他无效选项时，清空列表
+        setCheckLists([]);
+    }
+}, [selectModel]);
 
   // 處理checkList狀態選擇下拉選單變化
   const handleStatusChange = (checklistId, newStatus) => {

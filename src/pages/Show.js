@@ -153,24 +153,39 @@ const Show = (pros) => {
   };
 
   // selectModel的下拉式選單
-  const handleSelectModelChange = async (e) => {
+  const handleSelectModelChange = (e) => {
     const selectedModelId = Number(e.target.value);
     console.log("Selected Model ID:", selectedModelId);
     setSelectModel(selectedModelId);
-    
-    // 这里调用 API 获取该模型的测试项和检查项
-    try {
-      const testItemsResponse = await fetch(`http://localhost:3000/api/items/${selectedModelId}`);
-      if (!testItemsResponse.ok) throw new Error('Failed to fetch test items');
-      const testItems = await testItemsResponse.json();
-  
-      // 更新状态以反映获取的测试项
-      setMeasureListItems(testItems);
-    } catch (error) {
-      console.error('Error fetching test items:', error);
-      alert('Failed to fetch test items, please check your network connection.');
+
+    // 如果 selectedModelId 为 0，则不执行任何操作，直接返回
+    if (selectedModelId === 0) {
+        setMeasureListItems([]);  // 可以选择清空当前的检查项列表或保持前一个状态
+        return;  // 提前退出函数
     }
-  };
+
+    // 假设已有数据，例如从其他组件或者上层组件传递下来
+    const checkItemData = modelListsItems.find(model => model.modelId === selectedModelId);
+
+    // 检查数据是否存在，模拟结构如下所示
+    if (checkItemData) {
+        const formattedCheckItem = {
+            id: checkItemData.modelId,
+            text: checkItemData.modelName,
+            description: "Description for " + checkItemData.modelName,
+            measureResult: "",
+            measureResultIsPass: "",
+            is_critical: false  // 假设为静态值
+        };
+        setMeasureListItems([formattedCheckItem]);  // 更新状态以显示当前选中的模型信息
+    } else {
+        // 仅当 selectedModelId 不为 0 且找不到数据时才显示错误
+        console.error('Model data not found for ID:', selectedModelId);
+        alert('Model data not found');
+    }
+};
+
+
 
   // 按下Send按鈕的事件
   const handleSendButtonClick = () => {
