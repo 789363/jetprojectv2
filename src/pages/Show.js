@@ -153,9 +153,23 @@ const Show = (pros) => {
   };
 
   // selectModel的下拉式選單
-  const handleSelectModelChange = (e) => {
-    console.log("e.target.value", e.target.value);
-    setSelectModel(Number(e.target.value));
+  const handleSelectModelChange = async (e) => {
+    const selectedModelId = Number(e.target.value);
+    console.log("Selected Model ID:", selectedModelId);
+    setSelectModel(selectedModelId);
+    
+    // 这里调用 API 获取该模型的测试项和检查项
+    try {
+      const testItemsResponse = await fetch(`http://localhost:3000/api/items/${selectedModelId}`);
+      if (!testItemsResponse.ok) throw new Error('Failed to fetch test items');
+      const testItems = await testItemsResponse.json();
+  
+      // 更新状态以反映获取的测试项
+      setMeasureListItems(testItems);
+    } catch (error) {
+      console.error('Error fetching test items:', error);
+      alert('Failed to fetch test items, please check your network connection.');
+    }
   };
 
   // 按下Send按鈕的事件
