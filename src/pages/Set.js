@@ -121,12 +121,14 @@ const fetchUserModels = (opId) => {
             </div>
             <div style={{ height: "25%", display: "flex", flexDirection: "column", justifyContent: "space-between", marginLeft: "-10px", paddingBottom: "10px" }}>
               <button type="button" className="btn btn-info" style={buttonStyle} onClick={handleShowClick}>退出編輯模式</button>
-              <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => handleCanEditOPIDButtonClick("user")}>User</button>
-              <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => handleCanEditOPIDButtonClick("manage")}>Management</button>
+              <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => handleCanEditOPIDButtonClick("user")}>User模式</button>
+              {who === "manage" && ( // 只有當 who 為 'manage' 時才顯示此按鈕
+                <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => handleCanEditOPIDButtonClick("manage")}>Management</button>
+              )}
             </div>
           </div>
         </div>
-
+  
         <div className="col" style={{ alignContent: "center", backgroundColor: "#DDE3EC" }}>
           <SetModelPage selectModel={activeModel} who={who} modelListsItems={modelListsItems} setModelListsItems={setModelListsItems} />
         </div>
