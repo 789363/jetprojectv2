@@ -19,14 +19,18 @@ const SetModelPage = (pros) => {
         try {
           const response = await fetch(`http://localhost:3000/api/checkitems/${selectModel.modelId}`);
           const data = await response.json();
-          setCheckLists(data);  // Assuming the API returns an array of test items
-          console.log(data)
+          // 轉換每個條目的理由為對象格式
+          const formattedData = data.map(item => ({
+            ...item,
+            reasons: item.reasons.map((reason, index) => ({ id: index, description: reason }))
+          }));
+          setCheckLists(formattedData);
         } catch (error) {
           console.error("Failed to fetch test items:", error);
         }
       }
     };
-
+  
     fetchTestItems();
   }, [selectModel]);
 
@@ -124,19 +128,41 @@ const handleDelete = async (itemId) => {
     setEditItem({ ...editItem, selectedReason: e.target.value });
   };
 
+
+  
   
 
-  const handleAddReason = () => {
-    const newReason = prompt("Enter new reason:");
-    if (newReason && !editItem.reasons.includes(newReason)) {
-      setEditItem({
-        ...editItem,
-        reasons: [...editItem.reasons, newReason],
-        selectedReason: newReason,
-      });
+  const handleAddReason = async () => {
+    const newReasonDescription = prompt("Enter new reason:");
+    if (newReasonDescription && editItem.id) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/reasons`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            description: newReasonDescription,
+            checkitem_id: editItem.id
+          }),
+        });
+  
+        if (!response.ok) {
+          throw new Error(`Failed to add reason: ${response.statusText}`);
+        }
+  
+        const newReason = await response.json();
+        setEditItem(prev => ({
+          ...prev,
+          reasons: [...prev.reasons, { id: newReason.reason_id, description: newReason.description }]
+        }));
+        alert('Reason added successfully');
+      } catch (error) {
+        console.error('Error adding reason:', error);
+        alert(`Failed to add reason: ${error.message}`);
+      }
     }
   };
-
   const saveChanges = async () => {
     try {
         const method = editItem.isNew ? 'POST' : 'PUT';
@@ -178,17 +204,33 @@ const handleDelete = async (itemId) => {
         alert('保存检查项目时出错：' + error.message);
     }
 };
-  const handleRemoveReason = () => {
-    const updatedReasons = editItem.reasons.filter(
-      (reason) => reason !== editItem.selectedReason
-    );
-    setEditItem({
-      ...editItem,
-      reasons: updatedReasons,
-      selectedReason: updatedReasons.length > 0 ? updatedReasons[0] : "NA",
-    });
-  };
 
+const handleRemoveReason = async (reasonId) => {
+  console.log(reasonId)
+  console.log(123)
+  try {
+      // 确保 reasonId 是一个数字或字符串类型的 ID，而不是一个对象
+      const response = await fetch(`http://localhost:3000/api/reasons/${reasonId}`, {
+          method: 'DELETE',
+      });
+
+      if (!response.ok) {
+          throw new Error('Failed to delete reason');
+      }
+
+      // 更新状态以移除客户端列表中的项
+      setEditItem(prev => ({
+          ...prev,
+          reasons: prev.reasons.filter(r => r.id !== reasonId) // 假设每个理由对象都有一个 id 属性
+      }));
+      alert('Reason deleted successfully');
+  } catch (error) {
+      console.error('Error deleting reason:', error);
+      alert('Failed to delete reason: ' + error.message);
+  }
+};
+
+  
   return (
     <>
       <div
@@ -427,18 +469,19 @@ const handleDelete = async (itemId) => {
                   Fail Reasons：
                 </div>
                 <div>
-                  <select
-                    value={editItem.selectedReason}
-                    style={{ borderRadius: "5px", marginRight: "10px" }}
-                    onChange={handleReasonChange}
-                  >
-                    {editItem.reasons.map((reason, index) => (
-                      <option key={index} value={reason}>
-                        {reason}
-                      </option>
-                    ))}
-                  </select>
-                  {editItem.isNew ? (
+                
+                <select
+  value={editItem.selectedReason}
+  style={{ borderRadius: "5px", marginRight: "10px" }}
+  onChange={handleReasonChange}
+>
+  {editItem.reasons.map((reason, index) => (
+    <option key={index} value={reason.id}>
+      {reason.description}
+    </option>
+  ))}
+</select>
+                        {editItem.isNew ? (
                     <button
                       class="btn btn-info"
                       style={{
