@@ -80,25 +80,21 @@ const SetModelPage = (pros) => {
     setShowModal(true);
   };
 
+  
   // 刪除檢查項目
 // 刪除檢查項目
 const handleDelete = async (itemId) => {
   try {
-    // 发送 DELETE 请求到后端 API
     const response = await fetch(`http://localhost:3000/api/checkitems/${itemId}`, {
       method: 'DELETE',
     });
 
-    // 检查响应是否成功
     if (!response.ok) {
       throw new Error(`Failed to delete check item with status: ${response.status}`);
     }
 
-    // 更新状态以移除客户端列表中的项
-    const updatedCheckLists = checkLists.filter(item => item.id !== itemId);
-    setCheckLists(updatedCheckLists);
-
-    // 可以在这里添加用户反馈，例如使用一个简单的alert或一个更复杂的消息通知系统
+    // 更新狀態以移除客户端列表中的項目
+    setCheckLists(prevCheckLists => prevCheckLists.filter(item => item.id !== itemId));
     alert('Item deleted successfully');
   } catch (error) {
     console.error('Failed to delete check item:', error);
@@ -124,38 +120,11 @@ const handleDelete = async (itemId) => {
     }
   };
 
-  const handleSaveAllModels = () => {
-    const newModel = createNewModelVersion();
-    const updatedModelList = [...modelListsItems, newModel];
-
-    // 將Model進行排序，將版本直接分組到對應的基本模型下
-    updatedModelList.sort((a, b) => {
-      const baseNameA = a.modelName.split("_version")[0];
-      const baseNameB = b.modelName.split("_version")[0];
-
-      // 如果基本名稱相同，則按版本號排序
-      if (baseNameA === baseNameB) {
-        const versionNumberA = parseInt(
-          a.modelName.split("_version")[1] || 0,
-          10
-        );
-        const versionNumberB = parseInt(
-          b.modelName.split("_version")[1] || 0,
-          10
-        );
-        return versionNumberA - versionNumberB;
-      }
-      return a.modelName.localeCompare(b.modelName);
-    });
-
-    setModelListsItems(updatedModelList);
-    // setActiveModel(newModel);
-    alert(`Saved as new version: ${newModel.modelName}`);
-  };
-
   const handleReasonChange = (e) => {
     setEditItem({ ...editItem, selectedReason: e.target.value });
   };
+
+  
 
   const handleAddReason = () => {
     const newReason = prompt("Enter new reason:");
@@ -168,18 +137,47 @@ const handleDelete = async (itemId) => {
     }
   };
 
-  const saveChanges = () => {
-    if (editItem.isNew) {
-      checkLists.push(editItem);
-    } else {
-      const updatedCheckLists = checkLists.map((item) =>
-        item.id === editItem.id ? { ...editItem } : item
-      );
-      setCheckLists(updatedCheckLists);
-    }
-    setShowModal(false);
-  };
+  const saveChanges = async () => {
+    try {
+        const method = editItem.isNew ? 'POST' : 'PUT';
+        const url = `http://localhost:3000/api/checkitems/${editItem.isNew ? '' : editItem.id}`;
+        const bodyData = {
+            description: editItem.text,  // 'description' 對應後端的字段名
+            status: editItem.status,  // 確認後端是否有這個字段，如果沒有，需要適當調整
+            reasons: editItem.reasons.join(','),  // 如果後端接收的是字符串，需要進行轉換
+            selectedReason: editItem.selectedReason,
+            module_id: editItem.isNew ? selectModel.modelId : undefined
+        };
 
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(bodyData),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        setCheckLists(prevCheckLists => {
+            if (editItem.isNew) {
+                return [...prevCheckLists, { ...result, id: result.checkitem_id, text: result.description }];
+            } else {
+                return prevCheckLists.map(item => item.id === editItem.id ? { ...item, ...result, text: result.description } : item);
+            }
+        });
+
+        setShowModal(false);
+        alert('更改已成功保存！');
+    } catch (error) {
+        console.error('保存检查项目失败:', error);
+        alert('保存检查项目时出错：' + error.message);
+    }
+};
   const handleRemoveReason = () => {
     const updatedReasons = editItem.reasons.filter(
       (reason) => reason !== editItem.selectedReason
@@ -394,23 +392,7 @@ const handleDelete = async (itemId) => {
           ) : (
             <div></div>
           )}
-          <button
-            type="button"
-            class="btn btn-info"
-            style={{
-              backgroundColor: "#3668A4",
-              border: "0px",
-              borderRadius: "10px",
-              // width: "10vh",
-              boxShadow: "0px 2px 2px #ccc",
-              fontSize: "20px",
-              marginTop: "20px",
-              marginBottom: "20px",
-            }}
-            onClick={handleSaveAllModels}
-          >
-            Seve All
-          </button>
+        
         </div>
       </div>
       {showModal && (
