@@ -9,98 +9,27 @@ const SetModelPage = (pros) => {
     modelListsItems,
     setModelListsItems,
   } = pros;
-  const [checkLists, setCheckLists] = useState([
-    {
-      id: 1,
-      text: "No wrong, missing, reverse, damaged, broken, extra part,...",
-      status: "NA",
-      reasons: ["Reason 1-1", "Reason 1-2", "Reason 1-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 2,
-      text: "No extra flux PCBA surface or solder dreg on PCBA surface",
-      status: "NA",
-      reasons: ["Reason 2-1", "Reason 2-2", "Reason 2-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 3,
-      text: "No scratch, surface blister, voids, oxiding, peel off,...",
-      status: "NA",
-      reasons: ["Reason 3-1", "Reason 3-2", "Reason 3-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 4,
-      text: "Connect direction correct way, including: damage,...",
-      status: "NA",
-      reasons: ["Reason 4-1", "Reason 4-2", "Reason 4-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 5,
-      text: "Function test",
-      status: "NA",
-      reasons: ["Reason 5-1", "Reason 5-2", "Reason 5-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 6,
-      text: "The content in the label must be right place, complete, clear ...",
-      status: "NA",
-      reasons: ["Reason 6-1", "Reason 6-2", "Reason 6-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 7,
-      text: "Product packing specification verification",
-      status: "NA",
-      reasons: ["Reason 7-1", "Reason 7-2", "Reason 7-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 8,
-      text: "The label in the right position and direction, clear to verify and ...",
-      status: "NA",
-      reasons: ["Reason 8-1", "Reason 8-2", "Reason 8-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 9,
-      text: "The label in the right position and direction, clear to verify and ...",
-      status: "NA",
-      reasons: ["Reason 9-1", "Reason 9-2", "Reason 9-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-    {
-      id: 10,
-      text: "The label in the right position and direction, clear to verify and ...",
-      status: "NA",
-      reasons: ["Reason 10-1", "Reason 10-2", "Reason 10-3"],
-      selectedReason: "NA",
-      disabledReason: true,
-      checked: false,
-    },
-  ]);
+  console.log(pros)
+  const [checkLists, setCheckLists] = useState([]);
+
+  // Fetch test items based on the modelId
+  useEffect(() => {
+    const fetchTestItems = async () => {
+      if (selectModel && selectModel.modelId) {
+        try {
+          const response = await fetch(`http://localhost:3000/api/checkitems/${selectModel.modelId}`);
+          const data = await response.json();
+          setCheckLists(data);  // Assuming the API returns an array of test items
+          console.log(data)
+        } catch (error) {
+          console.error("Failed to fetch test items:", error);
+        }
+      }
+    };
+
+    fetchTestItems();
+  }, [selectModel]);
+
 
   const [editItem, setEditItem] = useState({
     id: 0,
