@@ -48,14 +48,14 @@ const SetModelPage = (pros) => {
   // 可編輯的OPID，預設是看不到的，要按使用者按鈕才可以看到
   const [showEditOPID, setEditOPID] = useState(false);
 
-  const [canEditOPID, setCanEditOPID] = useState(["123456", "222222"]);
+  const [canEditOPID, setCanEditOPID] = useState([]);
   useEffect(() => {
     // GETselectModel的checkLists
     // GETselectModel的canEditOPID
   }, []);
 
   useEffect(() => {
-    who === "admin" ? setEditOPID(true) : setEditOPID(false);
+    who === "manage" ? setEditOPID(true) : setEditOPID(false);
   }, [who]);
 
   // 新增檢查項目
@@ -81,10 +81,30 @@ const SetModelPage = (pros) => {
   };
 
   // 刪除檢查項目
-  const handleDelete = (itemId) => {
-    const updatedCheckLists = checkLists.filter((item) => item.id !== itemId);
+// 刪除檢查項目
+const handleDelete = async (itemId) => {
+  try {
+    // 发送 DELETE 请求到后端 API
+    const response = await fetch(`http://localhost:3000/api/checkitems/${itemId}`, {
+      method: 'DELETE',
+    });
+
+    // 检查响应是否成功
+    if (!response.ok) {
+      throw new Error(`Failed to delete check item with status: ${response.status}`);
+    }
+
+    // 更新状态以移除客户端列表中的项
+    const updatedCheckLists = checkLists.filter(item => item.id !== itemId);
     setCheckLists(updatedCheckLists);
-  };
+
+    // 可以在这里添加用户反馈，例如使用一个简单的alert或一个更复杂的消息通知系统
+    alert('Item deleted successfully');
+  } catch (error) {
+    console.error('Failed to delete check item:', error);
+    alert('Error deleting check item: ' + error.message);
+  }
+};
 
   // 刪除可編輯的OPID
   const removeOPID = (opidToRemove) => {
