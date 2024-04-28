@@ -167,7 +167,7 @@ const SetModelPage = (pros) => {
   // 新增可編輯的OPID
   const addOPID = () => {
     const newOPID = prompt("Add OPID:");
-    // 如果newOPID有值，而且長度是6，而且canEditOPID裡面沒有newOPID，就新增canEditOPID
+    // 如果newOPID有值，而且長度是6，而且canEditOPID裡面沒有newOPID，01就新增canEditOPID
     if (newOPID && newOPID.length === 6 && !canEditOPID.includes(newOPID)) {
       setCanEditOPID([...canEditOPID, newOPID]);
     } else {
