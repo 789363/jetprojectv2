@@ -16,8 +16,8 @@ const Set = (props) => {
       .then(response => response.json())
       .then(data => {
         console.log(data)
-        if (data.op_name === "admin") {
-          setWho("admin");
+        if (data.op_name === "manage") {
+          setWho("manage");
           setShowAllModels(true);
           fetchAllModels();
         } else {
@@ -48,7 +48,7 @@ const Set = (props) => {
 
 const fetchUserModels = (opId) => {
  
-    fetch(`http://localhost:3000/api/setmodules/`)
+    fetch(`http://localhost:3000/api/setmodules/${enteredOPID}`)
       .then(response => response.json())
       .then(data => {
           if (Array.isArray(data)) {
@@ -89,7 +89,7 @@ const fetchUserModels = (opId) => {
   };
 
   const handleCanEditOPIDButtonClick = (value) => {
-    if (value === "admin" && who !== "admin") {
+    if (value === "manage" && who !== "manage") {
       setShowAllModels(true);
       fetchAllModels();
     } else if (value === "user" && who !== "user") {
@@ -122,7 +122,7 @@ const fetchUserModels = (opId) => {
             <div style={{ height: "25%", display: "flex", flexDirection: "column", justifyContent: "space-between", marginLeft: "-10px", paddingBottom: "10px" }}>
               <button type="button" className="btn btn-info" style={buttonStyle} onClick={handleShowClick}>退出編輯模式</button>
               <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => handleCanEditOPIDButtonClick("user")}>User</button>
-              <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => handleCanEditOPIDButtonClick("admin")}>Management</button>
+              <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => handleCanEditOPIDButtonClick("manage")}>Management</button>
             </div>
           </div>
         </div>
