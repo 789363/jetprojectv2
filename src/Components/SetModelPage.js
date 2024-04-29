@@ -86,7 +86,6 @@ const SetModelPage = (pros) => {
     setShowModal(true);
   };
 
-  
   // 刪除檢查項目
 // 刪除檢查項目
 const handleDelete = async (itemId) => {
@@ -118,14 +117,12 @@ const handleDelete = async (itemId) => {
   // 新增可編輯的OPID
   const addOPID = () => {
     const newOPID = prompt("Add OPID:");
-    // 如果newOPID有值，而且長度是6，而且canEditOPID裡面沒有newOPID，01就新增canEditOPID
     if (newOPID && newOPID.length === 6 && !canEditOPID.includes(newOPID)) {
-      setCanEditOPID([...canEditOPID, newOPID]);
+      setCanEditOPID(prevOPIDs => [...prevOPIDs, newOPID]);
     } else {
-      alert("Invalid OPID!");
+      alert("Invalid OPID! OPID must be exactly 6 characters long.");
     }
   };
-
   const handleReasonChange = (e) => {
     setEditItem({ ...editItem, selectedReason: e.target.value });
   };
@@ -182,71 +179,6 @@ const handleDelete = async (itemId) => {
     fetchCheckItems();
   }, [selectModel]);
 
-  const saveChanges = async () => {
-    try {
-      const method = editItem.isNew ? 'POST' : 'PUT';
-      const url = `http://localhost:3000/api/checkitems/${editItem.isNew ? '' : editItem.id}`;
-      const bodyData = {
-        description: editItem.text,
-        status: editItem.status,
-        reasons: editItem.reasons.join(','),
-        selectedReason: editItem.selectedReason,
-        module_id: editItem.isNew ? selectModel.modelId : undefined
-      };
-  
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bodyData),
-      });
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-  
-      await fetchCheckItems(); // Fetch all items again after the update
-      setShowModal(false);
-      alert('更改已成功保存！');
-    } catch (error) {
-      console.error('保存检查项目失败:', error);
-      alert('保存检查项目时出错：' + error.message);
-    }
-  };
-
-const handleRemoveReason = async () => {
-  try {
-    // 通过类名选择下拉菜单元素，并获取其值
-    const selectedReasonId = document.querySelector(".reason-select").value;
-    console.log(selectedReasonId);
-
-    // 检查当前选定的理由是否不是 "NA"
-    if (selectedReasonId !== "NA") {
-      // 发送删除请求到服务器
-      const response = await fetch(`http://localhost:3000/api/reasons/${selectedReasonId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete reason');
-      }
-
-      // 更新状态以移除客户端列表中的项
-      setEditItem(prev => ({
-        ...prev,
-        reasons: prev.reasons.filter(r => r.id !== selectedReasonId)
-      }));
-      alert('Reason deleted successfully');
-    } else {
-      // 如果当前选定的理由是 "NA"，则显示提示信息
-      alert('Please select a reason to delete');
-    }
-  } catch (error) {
-    console.error('Error deleting reason:', error);
-    alert('Failed to delete reason: ' + error.message);
-  }
-};
 const handleStatusChange = (e, itemId) => {
   const newStatus = e.target.value;
   // 更新清单项状态
@@ -296,17 +228,18 @@ return (
             <button className="btn btn-info" style={{ backgroundColor: "#FB5144", border: "0px", borderRadius: "10px", width: "10vh", boxShadow: "0px 2px 2px #ccc", fontSize: "16px", marginRight: "5px" }} onClick={() => handleDelete(item.id)}>Delete</button>
           </div>
           <hr className="hr-style" />
+          
         </div>
       ))}
     </div>
-    <AddCheckListItemModal
-  showModal={showModal && editItem.isNew}
-  setShowModal={setShowModal}
-  editItem={editItem}
-  setEditItem={setEditItem}
-  selectModel={selectModel}
-  onRefresh={fetchCheckItems} // 传递刷新函数
-/>
+        <AddCheckListItemModal
+      showModal={showModal && editItem.isNew}
+      setShowModal={setShowModal}
+      editItem={editItem}
+      setEditItem={setEditItem}
+      selectModel={selectModel}
+      onRefresh={fetchCheckItems} // 传递刷新函数
+    />
     <EditCheckListItemModal
       showModal={showModal && !editItem.isNew}
       setShowModal={setShowModal}
