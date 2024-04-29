@@ -13,7 +13,8 @@ const SetModelPage = (pros) => {
   } = pros;
   console.log(pros)
   const [checkLists, setCheckLists] = useState([]);
-
+  const [opIds, setOpIds] = useState([]); // 新状态用于存储OPID列表
+  
   // Fetch test items based on the modelId
   useEffect(() => {
     const fetchTestItems = async () => {
@@ -27,6 +28,7 @@ const SetModelPage = (pros) => {
             reasons: item.reasons.map((reason, index) => ({ id: index, description: reason }))
           }));
           setCheckLists(formattedData);
+          
         } catch (error) {
           console.error("Failed to fetch test items:", error);
         }
@@ -35,7 +37,30 @@ const SetModelPage = (pros) => {
   
     fetchTestItems();
   }, [selectModel]);
+  // Fetch OPIDs based on the modelId
+useEffect(() => {
+  const fetchOpIds = async () => {
+    if (selectModel && selectModel.modelId) {
+      try {
+        // 确保这个URL和参数是正确的
+        const response = await fetch(`http://localhost:3000/api/moduleops/${selectModel.modelId}`);
+        if (response.ok) {
+          const moduleOps = await response.json();
+          // 假设每个moduleOps对象都有op_id属性
+          setOpIds(moduleOps.map(op => op.op_id));
+          console.log(moduleOps)
+        } else {
+          throw new Error('Failed to fetch OPIDs');
+        }
+      } catch (error) {
+        console.error("Failed to fetch OPIDs:", error);
+      }
+    }
+  };
 
+  fetchOpIds();
+}, [selectModel.modelId]);
+  
 
   const [editItem, setEditItem] = useState({
     id: 0,
@@ -231,6 +256,79 @@ return (
           
         </div>
       ))}
+       {showEditOPID ? (
+            <>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  marginTop: "20px",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  textAlign: "center",
+                  width: "100%",
+                }}
+              >
+                <div
+                  style={{
+                    width: "15%",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  可編輯的OPID：
+                </div>
+                {canEditOPID.map((opid, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      width: "15%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      marginTop: "5px",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    <div>{opid}</div>
+                    <button
+                      class="btn btn-info"
+                      style={{
+                        backgroundColor: "#FB5144",
+                        border: "0px",
+                        borderRadius: "10px",
+                        width: "10vh",
+                        boxShadow: "0px 2px 2px #ccc",
+                        fontSize: "16px",
+                        marginRight: "5px",
+                      }}
+                      onClick={() => removeOPID(opid)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  class="btn btn-info"
+                  style={{
+                    backgroundColor: "#fff",
+                    color: "#000",
+                    border: "1px solid #ccc",
+                    borderRadius: "10px",
+                    boxShadow: "0px 2px 2px #ccc",
+                    fontSize: "16px",
+                    marginTop: "10px",
+                  }}
+                  onClick={addOPID}
+                >
+                  + 新增可編輯的OPID
+                </button>
+              </div>
+            </>
+          ) : (
+            <div></div>
+          )}
     </div>
         <AddCheckListItemModal
       showModal={showModal && editItem.isNew}
