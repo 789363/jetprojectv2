@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../style/set.scss";
+import AddCheckListItemModal from './AddCheckListItemModal';
+import EditCheckListItemModal from './EditCheckListItemModal';
 
 const SetModelPage = (pros) => {
   const {
@@ -128,10 +130,6 @@ const handleDelete = async (itemId) => {
     setEditItem({ ...editItem, selectedReason: e.target.value });
   };
 
-
-  
-  
-
   const handleAddReason = async () => {
     const newReasonDescription = prompt("Enter new reason:");
     if (newReasonDescription && editItem.id) {
@@ -163,397 +161,162 @@ const handleDelete = async (itemId) => {
       }
     }
   };
+
+  const fetchCheckItems = async () => {
+    if (selectModel && selectModel.modelId) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/checkitems/${selectModel.modelId}`);
+        const data = await response.json();
+        const formattedData = data.map(item => ({
+          ...item,
+          reasons: item.reasons.map((reason, index) => ({ id: index, description: reason }))
+        }));
+        setCheckLists(formattedData);
+      } catch (error) {
+        console.error("Failed to fetch check items:", error);
+      }
+    }
+  };
+  
+  useEffect(() => {
+    fetchCheckItems();
+  }, [selectModel]);
+
   const saveChanges = async () => {
     try {
-        const method = editItem.isNew ? 'POST' : 'PUT';
-        const url = `http://localhost:3000/api/checkitems/${editItem.isNew ? '' : editItem.id}`;
-        const bodyData = {
-            description: editItem.text,  // 'description' 對應後端的字段名
-            status: editItem.status,  // 確認後端是否有這個字段，如果沒有，需要適當調整
-            reasons: editItem.reasons.join(','),  // 如果後端接收的是字符串，需要進行轉換
-            selectedReason: editItem.selectedReason,
-            module_id: editItem.isNew ? selectModel.modelId : undefined
-        };
-
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(bodyData),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        setCheckLists(prevCheckLists => {
-            if (editItem.isNew) {
-                return [...prevCheckLists, { ...result, id: result.checkitem_id, text: result.description }];
-            } else {
-                return prevCheckLists.map(item => item.id === editItem.id ? { ...item, ...result, text: result.description } : item);
-            }
-        });
-
-        setShowModal(false);
-        alert('更改已成功保存！');
+      const method = editItem.isNew ? 'POST' : 'PUT';
+      const url = `http://localhost:3000/api/checkitems/${editItem.isNew ? '' : editItem.id}`;
+      const bodyData = {
+        description: editItem.text,
+        status: editItem.status,
+        reasons: editItem.reasons.join(','),
+        selectedReason: editItem.selectedReason,
+        module_id: editItem.isNew ? selectModel.modelId : undefined
+      };
+  
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bodyData),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      await fetchCheckItems(); // Fetch all items again after the update
+      setShowModal(false);
+      alert('更改已成功保存！');
     } catch (error) {
-        console.error('保存检查项目失败:', error);
-        alert('保存检查项目时出错：' + error.message);
+      console.error('保存检查项目失败:', error);
+      alert('保存检查项目时出错：' + error.message);
     }
-};
+  };
 
-const handleRemoveReason = async (reasonId) => {
-  console.log(reasonId)
-  console.log(123)
+const handleRemoveReason = async () => {
   try {
-      // 确保 reasonId 是一个数字或字符串类型的 ID，而不是一个对象
-      const response = await fetch(`http://localhost:3000/api/reasons/${reasonId}`, {
-          method: 'DELETE',
+    // 通过类名选择下拉菜单元素，并获取其值
+    const selectedReasonId = document.querySelector(".reason-select").value;
+    console.log(selectedReasonId);
+
+    // 检查当前选定的理由是否不是 "NA"
+    if (selectedReasonId !== "NA") {
+      // 发送删除请求到服务器
+      const response = await fetch(`http://localhost:3000/api/reasons/${selectedReasonId}`, {
+        method: 'DELETE',
       });
 
       if (!response.ok) {
-          throw new Error('Failed to delete reason');
+        throw new Error('Failed to delete reason');
       }
 
       // 更新状态以移除客户端列表中的项
       setEditItem(prev => ({
-          ...prev,
-          reasons: prev.reasons.filter(r => r.id !== reasonId) // 假设每个理由对象都有一个 id 属性
+        ...prev,
+        reasons: prev.reasons.filter(r => r.id !== selectedReasonId)
       }));
       alert('Reason deleted successfully');
+    } else {
+      // 如果当前选定的理由是 "NA"，则显示提示信息
+      alert('Please select a reason to delete');
+    }
   } catch (error) {
-      console.error('Error deleting reason:', error);
-      alert('Failed to delete reason: ' + error.message);
+    console.error('Error deleting reason:', error);
+    alert('Failed to delete reason: ' + error.message);
   }
 };
-
-  
-  return (
-    <>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <h4 style={{ marginRight: "10px" }}>Edit OQC CheckLists</h4>
-        <button
-          type="button"
-          class="btn btn-info"
-          style={{
-            backgroundColor: "#F3934D",
-            border: "0px",
-            borderRadius: "10px",
-            boxShadow: "0px 2px 2px #ccc",
-            fontSize: "16px",
-            height: "40px",
-          }}
-          onClick={handleAddCheckItem}
-        >
-          Add CheckListItem
-        </button>
-      </div>
-      <div className="model-checklist-div">
-        {checkLists.map((item) => (
-          <div key={item.id} className="model-checklist-body-each-div">
-            <div className="model-checklist-body-each-text-div">
-              {item.id}. {item.text}
-            </div>
-            <div
-              style={{
-                width: "15%",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <select
-                style={{ borderRadius: "5px", marginRight: "10px" }}
-                value={item.status}
-                onChange={(e) =>
-                  setCheckLists(
-                    checkLists.map((checkItem) =>
-                      checkItem.id === item.id
-                        ? { ...checkItem, status: e.target.value }
-                        : checkItem
-                    )
-                  )
-                }
-              >
-                <option value="NA">NA</option>
-                <option value="PASS">PASS</option>
-                <option value="FAIL">FAIL</option>
-              </select>
-              <select
-                style={{ borderRadius: "5px", marginRight: "10px" }}
-                value={item.selectedReason}
-                onChange={(e) =>
-                  setCheckLists(
-                    checkLists.map((checkItem) =>
-                      checkItem.id === item.id
-                        ? {
-                            ...checkItem,
-                            selectedReason: e.target.value,
-                          }
-                        : checkItem
-                    )
-                  )
-                }
-              >
-                {item.status === "FAIL" ? (
-                  item.reasons.map((reason, index) => (
-                    <option key={index} value={reason}>
-                      {reason}
-                    </option>
-                  ))
-                ) : (
-                  <option value="NA">NA</option>
-                )}
-              </select>
-            </div>
-            <div
-              style={{
-                width: "15%",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <button
-                class="btn btn-info"
-                style={{
-                  backgroundColor: "#30B16C",
-                  border: "0px",
-                  borderRadius: "10px",
-                  width: "10vh",
-                  boxShadow: "0px 2px 2px #ccc",
-                  fontSize: "16px",
-                  marginRight: "10px",
-                }}
-                onClick={() => handleEdit(item)}
-              >
-                Edit
-              </button>
-              <button
-                class="btn btn-info"
-                style={{
-                  backgroundColor: "#FB5144",
-                  border: "0px",
-                  borderRadius: "10px",
-                  width: "10vh",
-                  boxShadow: "0px 2px 2px #ccc",
-                  fontSize: "16px",
-                  marginRight: "5px",
-                }}
-                onClick={() => handleDelete(item.id)}
-              >
-                Delete
-              </button>
-            </div>
-            <hr className="hr-style" />
-          </div>
-        ))}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          {showEditOPID ? (
-            <>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  marginTop: "20px",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  textAlign: "center",
-                  width: "100%",
-                }}
-              >
-                <div
-                  style={{
-                    width: "15%",
-                    fontSize: "20px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  可編輯的OPID：
-                </div>
-                {canEditOPID.map((opid, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      width: "15%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginTop: "5px",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    <div>{opid}</div>
-                    <button
-                      class="btn btn-info"
-                      style={{
-                        backgroundColor: "#FB5144",
-                        border: "0px",
-                        borderRadius: "10px",
-                        width: "10vh",
-                        boxShadow: "0px 2px 2px #ccc",
-                        fontSize: "16px",
-                        marginRight: "5px",
-                      }}
-                      onClick={() => removeOPID(opid)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  class="btn btn-info"
-                  style={{
-                    backgroundColor: "#fff",
-                    color: "#000",
-                    border: "1px solid #ccc",
-                    borderRadius: "10px",
-                    boxShadow: "0px 2px 2px #ccc",
-                    fontSize: "16px",
-                    marginTop: "10px",
-                  }}
-                  onClick={addOPID}
-                >
-                  + 新增可編輯的OPID
-                </button>
-              </div>
-            </>
-          ) : (
-            <div></div>
-          )}
-        
-        </div>
-      </div>
-      {showModal && (
-        <div className="modal show d-block">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  {editItem.isNew
-                    ? "Add New CheckListItem"
-                    : "Edit CheckListItem"}
-                </h5>
-                <button
-                  type="button"
-                  className="close"
-                  onClick={() => setShowModal(false)}
-                >
-                  <span>&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <div style={{ marginBottom: "10px" }}>CheckListItem-Text：</div>
-                <input
-                  type="text"
-                  class="form-control"
-                  value={editItem.text}
-                  onChange={(e) =>
-                    setEditItem({ ...editItem, text: e.target.value })
-                  }
-                />
-                <div style={{ marginTop: "10px", marginBottom: "10px" }}>
-                  Fail Reasons：
-                </div>
-                <div>
-                
-                <select
-  value={editItem.selectedReason}
-  style={{ borderRadius: "5px", marginRight: "10px" }}
-  onChange={handleReasonChange}
->
-  {editItem.reasons.map((reason, index) => (
-    <option key={index} value={reason.id}>
-      {reason.description}
-    </option>
-  ))}
-</select>
-                        {editItem.isNew ? (
-                    <button
-                      class="btn btn-info"
-                      style={{
-                        backgroundColor: "#38D335",
-                        border: "0px",
-                        borderRadius: "5px",
-                        boxShadow: "0px 2px 2px #ccc",
-                        fontSize: "16px",
-                        marginLeft: "5px",
-                      }}
-                      onClick={handleAddReason}
-                    >
-                      + Add Reason
-                    </button>
-                  ) : (
-                    <>
-                      <button
-                        class="btn btn-info"
-                        style={{
-                          backgroundColor: "#38D335",
-                          border: "0px",
-                          borderRadius: "5px",
-                          width: "5vh",
-                          boxShadow: "0px 2px 2px #ccc",
-                          fontSize: "20px",
-                          marginRight: "5px",
-                        }}
-                        onClick={handleAddReason}
-                      >
-                        +
-                      </button>
-                      <button
-                        class="btn btn-info"
-                        style={{
-                          backgroundColor: "#F54B4B",
-                          border: "0px",
-                          borderRadius: "5px",
-                          width: "5vh",
-                          boxShadow: "0px 2px 2px #ccc",
-                          fontSize: "20px",
-                        }}
-                        onClick={handleRemoveReason}
-                      >
-                        -
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  class="btn btn-info"
-                  style={{
-                    backgroundColor: "#3668A4",
-                    border: "0px",
-                    borderRadius: "5px",
-                    width: "10vh",
-                    boxShadow: "0px 2px 2px #ccc",
-                    fontSize: "20px",
-                  }}
-                  type="button"
-                  onClick={saveChanges}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+const handleStatusChange = (e, itemId) => {
+  const newStatus = e.target.value;
+  // 更新清单项状态
+  setCheckLists(prevCheckLists =>
+    prevCheckLists.map(item =>
+      item.id === itemId ? { ...item, status: newStatus } : item
+    )
   );
+};
+  
+return (
+  <>
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <h4 style={{ marginRight: "10px" }}>Edit OQC CheckLists</h4>
+      <button
+        type="button"
+        className="btn btn-info"
+        style={{
+          backgroundColor: "#F3934D",
+          border: "0px",
+          borderRadius: "10px",
+          boxShadow: "0px 2px 2px #ccc",
+          fontSize: "16px",
+          height: "40px",
+        }}
+        onClick={handleAddCheckItem}
+      >
+        Add CheckListItem
+      </button>
+    </div>
+    <div className="model-checklist-div">
+      {checkLists.map((item) => (
+        <div key={item.id} className="model-checklist-body-each-div">
+          <div className="model-checklist-body-each-text-div">
+            {item.id}. {item.text}
+          </div>
+          <div style={{ width: "15%", display: "flex", justifyContent: "center" }}>
+            <select style={{ borderRadius: "5px", marginRight: "10px" }} value={item.status} onChange={(e) => handleStatusChange(e, item.id)}>
+              <option value="NA">NA</option>
+              <option value="PASS">PASS</option>
+              <option value="FAIL">FAIL</option>
+            </select>
+            <select style={{ borderRadius: "5px", marginRight: "10px" }} value={item.selectedReason} onChange={(e) => handleReasonChange(e, item.id)}>
+              {item.status === "FAIL" ? item.reasons.map((reason, index) => (<option key={index} value={reason.id}>{reason.description}</option>)) : <option value="NA">NA</option>}
+            </select>
+            <button className="btn btn-info" style={{ backgroundColor: "#30B16C", border: "0px", borderRadius: "10px", width: "10vh", boxShadow: "0px 2px 2px #ccc", fontSize: "16px", marginRight: "10px" }} onClick={() => handleEdit(item)}>Edit</button>
+            <button className="btn btn-info" style={{ backgroundColor: "#FB5144", border: "0px", borderRadius: "10px", width: "10vh", boxShadow: "0px 2px 2px #ccc", fontSize: "16px", marginRight: "5px" }} onClick={() => handleDelete(item.id)}>Delete</button>
+          </div>
+          <hr className="hr-style" />
+        </div>
+      ))}
+    </div>
+    <AddCheckListItemModal
+  showModal={showModal && editItem.isNew}
+  setShowModal={setShowModal}
+  editItem={editItem}
+  setEditItem={setEditItem}
+  selectModel={selectModel}
+  onRefresh={fetchCheckItems} // 传递刷新函数
+/>
+    <EditCheckListItemModal
+      showModal={showModal && !editItem.isNew}
+      setShowModal={setShowModal}
+      handleAddReason={handleAddReason}
+      editItem={editItem}
+      setEditItem={setEditItem}
+      onRefresh={fetchCheckItems} // 传递刷新函数
+    />
+  </>
+);
 };
 
 export default SetModelPage;
