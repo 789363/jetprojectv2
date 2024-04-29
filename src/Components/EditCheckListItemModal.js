@@ -3,14 +3,12 @@ import React, { useEffect } from 'react';
 const EditCheckListItemModal = ({
   showModal, setShowModal, editItem, setEditItem, onRefresh
 }) => {
-  
   useEffect(() => {
     if (showModal && !editItem.isNew && editItem.id) {
       fetchReasons(editItem.id);
     }
   }, [showModal, editItem.isNew, editItem.id]);
 
-  // 获取原因
   const fetchReasons = async (checkitemId) => {
     try {
       const response = await fetch(`http://localhost:3000/api/reasons/${checkitemId}`);
@@ -21,25 +19,62 @@ const EditCheckListItemModal = ({
       setEditItem(currentItem => ({ ...currentItem, reasons: reasonsData || [] }));
     } catch (error) {
       console.error('获取原因失败:', error);
-     
     }
   };
 
-  // 添加新的原因
   const handleAddReason = async () => {
-    const reasonDescription = prompt("InputReason:");
+    const reasonDescription = prompt("Input Reason:");
     if (!reasonDescription) return;
-    const newReason = {
-      id: Date.now(),  // 使用时间戳作为临时ID
-      description: reasonDescription
-    };
-    setEditItem(currentItem => ({
-      ...currentItem,
-      reasons: [...currentItem.reasons, newReason]
-    }));
+
+    try {
+      const response = await fetch('http://localhost:3000/api/reasons', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ description: reasonDescription, checkitem_id: editItem.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add reason');
+      }
+
+      const newReason = await response.json();
+      setEditItem(currentItem => ({
+        ...currentItem,
+        reasons: [...currentItem.reasons, newReason]
+      }));
+
+      alert('Reason added successfully');
+    } catch (error) {
+      console.error('Error adding reason:', error);
+      alert('Failed to add reason: ' + error.message);
+    }
   };
 
-  // 保存编辑
+  const handleDeleteReason = async (reasonId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/reasons/${reasonId}`, {
+        method: 'DELETE',
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to delete reason');
+      }
+  
+      // 正确更新状态以移除已删除的原因
+      setEditItem(currentItem => ({
+        ...currentItem,
+        reasons: currentItem.reasons.filter(reason => reason.reason_id !== reasonId)
+      }));
+  
+      alert('Reason deleted successfully');
+    } catch (error) {
+      console.error('Error deleting reason:', error);
+      alert('Failed to delete reason: ' + error.message);
+    }
+  };
+
   const handleSave = async () => {
     try {
       const response = await fetch(`http://localhost:3000/api/checkitems/${editItem.id}`, {
@@ -56,15 +91,15 @@ const EditCheckListItemModal = ({
       });
 
       if (!response.ok) {
-        throw new Error(`HeetError: ${response.status}`);
+        throw new Error(`Error: ${response.status}`);
       }
 
       await onRefresh();
       setShowModal(false);
-      alert('UpdateSeuses！');
+      alert('Update successful!');
     } catch (error) {
       console.error('保存检查项目失败:', error);
-      alert('Error：' + error.message);
+      alert('Error: ' + error.message);
     }
   };
 
@@ -74,50 +109,37 @@ const EditCheckListItemModal = ({
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">EditCheckList</h5>
+              <h5 className="modal-title">Edit CheckList Item</h5>
               <button type="button" className="close" onClick={() => setShowModal(false)}>
                 <span>&times;</span>
               </button>
             </div>
             <div className="modal-body">
-              <div style={{ marginBottom: "10px" }}>CheckList：</div>
+              <div style={{ marginBottom: "10px" }}>CheckList Item:</div>
               <input
                 type="text"
                 className="form-control"
                 value={editItem.text}
                 onChange={(e) => setEditItem({ ...editItem, text: e.target.value })}
               />
-              <div style={{ marginTop: "10px", marginBottom: "10px" }}>Reason：</div>
+              <div style={{ marginTop: "10px", marginBottom: "10px" }}>Reasons:</div>
               {editItem.reasons.length > 0 ? (
-                editItem.reasons.map((reason, index) => (
-                  <div key={index}>{reason.description}</div>
+                editItem.reasons.map((reason) => (
+                  <div key={reason.reason_id}>
+                    {reason.description}
+                    <button onClick={() => handleDeleteReason(reason.reason_id)}>Delete</button>
+                  </div>
                 ))
               ) : (
-                <p>No Reason。</p>
+                <p>No reasons added yet.</p>
               )}
-              <button
-                className="btn btn-info"
-                onClick={handleAddReason}
-                style={{ marginTop: "10px" }}
-              >
-                Add
+              <button className="btn btn-info" onClick={handleAddReason} style={{ marginTop: "10px" }}>
+                Add Reason
               </button>
             </div>
             <div className="modal-footer">
-              <button
-                className="btn btn-info"
-                style={{
-                  backgroundColor: "#3668A4",
-                  border: "0px",
-                  borderRadius: "5px",
-                  width: "10vh",
-                  boxShadow: "0px 2px 2px #ccc",
-                  fontSize: "20px",
-                }}
-                type="button"
-                onClick={handleSave}
-              >
-                Save
+              <button className="btn btn-primary" onClick={handleSave}>
+                Save Changes
               </button>
             </div>
           </div>
