@@ -30,24 +30,22 @@ const Set = (props) => {
   }, [enteredOPID]);
 
   const fetchAllModels = () => {
-    
     fetch(`http://localhost:3000/api/setmodules/`)
       .then(response => response.json())
       .then(data => {
-          if (Array.isArray(data)) {
+        console.log(data)
+          if (Array.isArray(data) && data.length > 0) {
               setModelListsItems(data);
-              if (data.length > 0) {
-                  setActiveModel(data[0]);
-              }
+              setActiveModel(data[0]); // 確保始終設置一個模型作為活躍模型
           } else {
               console.error('Expected an array but got:', data);
           }
       })
+  
       .catch(error => console.error('Error fetching all models:', error));
-};
+  };
 
 const fetchUserModels = (opId) => {
- 
     fetch(`http://localhost:3000/api/setmodules/${enteredOPID}`)
       .then(response => response.json())
       .then(data => {
@@ -122,7 +120,7 @@ const fetchUserModels = (opId) => {
             <div style={{ height: "25%", display: "flex", flexDirection: "column", justifyContent: "space-between", marginLeft: "-10px", paddingBottom: "10px" }}>
               <button type="button" className="btn btn-info" style={buttonStyle} onClick={handleShowClick}>退出編輯模式</button>
               <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => handleCanEditOPIDButtonClick("user")}>User模式</button>
-              {who === "manage" && ( // 只有當 who 為 'manage' 時才顯示此按鈕
+              {who === "manage" && (
                 <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => handleCanEditOPIDButtonClick("manage")}>Management</button>
               )}
             </div>
@@ -130,7 +128,9 @@ const fetchUserModels = (opId) => {
         </div>
   
         <div className="col" style={{ alignContent: "center", backgroundColor: "#DDE3EC" }}>
-          <SetModelPage selectModel={activeModel} who={who} modelListsItems={modelListsItems} setModelListsItems={setModelListsItems} />
+          {activeModel && (
+            <SetModelPage selectModel={activeModel.modelId} who={who} modelListsItems={modelListsItems} setModelListsItems={setModelListsItems} />
+          )}
         </div>
       </div>
     </>

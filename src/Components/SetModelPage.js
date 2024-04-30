@@ -3,52 +3,61 @@ import "../style/set.scss";
 import AddCheckListItemModal from './AddCheckListItemModal';
 import EditCheckListItemModal from './EditCheckListItemModal';
 
-const SetModelPage = (pros) => {
+const SetModelPage = (props) => {
   const {
     selectModel,
     who,
     createNewModelVersion,
     modelListsItems,
     setModelListsItems,
-  } = pros;
-  console.log(pros)
+  } = props;
+  console.log(props)
+  
   const [checkLists, setCheckLists] = useState([]);
   const [opIds, setOpIds] = useState([]); // 新状态用于存储OPID列表
   
-  // Fetch test items based on the modelId
-  useEffect(() => {
-    const fetchTestItems = async () => {
-      if (selectModel && selectModel.modelId) {
-        try {
-          const response = await fetch(`http://localhost:3000/api/checkitems/${selectModel.modelId}`);
-          const data = await response.json();
-          // 轉換每個條目的理由為對象格式
-          const formattedData = data.map(item => ({
-            ...item,
-            reasons: item.reasons.map((reason, index) => ({ id: index, description: reason }))
-          }));
-          setCheckLists(formattedData);
-          
-        } catch (error) {
-          console.error("Failed to fetch test items:", error);
-        }
+// Fetch test items based on the modelId
+useEffect(() => {
+  const fetchTestItems = async () => {
+    // 檢查 selectModel 是否存在且包含 modelId
+    if (selectModel) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/checkitems/${selectModel}`);
+        const data = await response.json();
+        // 轉換每個條目的理由為對象格式
+        const formattedData = data.map(item => ({
+          ...item,
+          reasons: item.reasons.map((reason, index) => ({ id: index, description: reason }))
+        }));
+        setCheckLists(formattedData);
+      } catch (error) {
+        console.error("Failed to fetch test items:", error);
       }
-    };
-  
-    fetchTestItems();
-  }, [selectModel]);
-  // Fetch OPIDs based on the modelId
+    }
+  };
+
+  fetchTestItems();
+}, [selectModel]);
+
+// Fetch OPIDs based on the modelId
 useEffect(() => {
   const fetchOpIds = async () => {
-    if (selectModel && selectModel.modelId) {
+    if (selectModel) {
       try {
-        // 确保这个URL和参数是正确的
-        const response = await fetch(`http://localhost:3000/api/moduleops/${selectModel.modelId}`);
+        const response = await fetch(`http://localhost:3000/api/moduleops/${selectModel}`);
         if (response.ok) {
-          const moduleOps = await response.json();
-          // 假设每个moduleOps对象都有op_id属性
-          setOpIds(moduleOps.map(op => op.op_id));
-          console.log(moduleOps)
+          const data = await response.json();
+          // 检查 data 是否为数组
+          if (Array.isArray(data)) {
+            // 如果是数组，提取所有 op_id
+            setCanEditOPID(data.map(op => op.op_id));
+          } else if (data && data.op_id) {
+            // 如果不是数组但是 data 有 op_id 属性，假定它是单个对象
+            setCanEditOPID([data.op_id]);
+          } else {
+            // 如果 data 既不是数组也没有 op_id，可能是错误的数据格式
+            console.error("Unexpected data format:", data);
+          }
         } else {
           throw new Error('Failed to fetch OPIDs');
         }
@@ -57,10 +66,9 @@ useEffect(() => {
       }
     }
   };
-
   fetchOpIds();
-}, [selectModel.modelId]);
-  
+}, [selectModel]);
+
 
   const [editItem, setEditItem] = useState({
     id: 0,
@@ -80,10 +88,7 @@ useEffect(() => {
   const [showEditOPID, setEditOPID] = useState(false);
 
   const [canEditOPID, setCanEditOPID] = useState([]);
-  useEffect(() => {
-    // GETselectModel的checkLists
-    // GETselectModel的canEditOPID
-  }, []);
+
 
   useEffect(() => {
     who === "manage" ? setEditOPID(true) : setEditOPID(false);
@@ -111,7 +116,6 @@ useEffect(() => {
     setShowModal(true);
   };
 
-  // 刪除檢查項目
 // 刪除檢查項目
 const handleDelete = async (itemId) => {
   try {
@@ -277,6 +281,8 @@ return (
                   }}
                 >
                   可編輯的OPID：
+                 
+                  
                 </div>
                 {canEditOPID.map((opid, index) => (
                   <div
