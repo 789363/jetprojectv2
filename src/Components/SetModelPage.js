@@ -160,20 +160,30 @@ const removeOPID = async ( selectModel, opidToRemove) => {
   const addOPID = async () => {
     const newOPID = prompt("Enter new OP ID:");
     if (newOPID && newOPID.length === 6 && !canEditOPID.includes(newOPID)) {
-      try {
-        const response = await fetch(`http://localhost:3000/api/moduleops`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ op_id: newOPID }) // 根据后端API需要的格式调整
-        });
-        if (response.ok) {
-          setCanEditOPID(prevOPIDs => [...prevOPIDs, newOPID]);
-        } else {
-          throw new Error('Failed to add OP ID');
+      // 确保 selectModel 是有效的，并且从中获取 moduleId
+      if (selectModel ) {
+        try {
+          const response = await fetch(`http://localhost:3000/api/moduleops`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ module_id: selectModel , op_id: newOPID })  // 使用 selectModel 中的 modelId
+          });
+          if (response.ok) {
+            const data = await response.json(); // 解析响应体获取新添加的数据
+            setCanEditOPID(prevOPIDs => [...prevOPIDs, data.op_id]); // 假设后端返回完整的对象
+            alert('OP ID added successfully');
+          } else if (response.status === 404) {
+            alert('The requested OP ID does not exist.');
+          } else {
+            const errorData = await response.json(); // 假设错误信息在响应体中
+            throw new Error(`Failed to add OP ID: ${errorData.message}`);
+          }
+        } catch (error) {
+          console.error('Error adding OP ID:', error);
+          alert('Failed to add OP ID: ' + error.message);
         }
-      } catch (error) {
-        console.error('Error adding OP ID:', error);
-        alert('Failed to add OP ID: ' + error.message);
+      } else {
+        alert("Model ID is not selected or invalid.");
       }
     } else {
       alert("Invalid OP ID! OP ID must be exactly 6 characters long and not duplicated.");
