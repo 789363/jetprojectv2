@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../style/set.scss";
-import SetModelPage from "../components/SetModelPage";
+import SetModelPage from "../components/CheckListEdit";
 
 const Set = (props) => {
   const { toggleShowSet, enteredOPID } = props;

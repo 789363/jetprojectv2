@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../style/set.scss";
-import AddCheckListItemModal from './AddCheckListItemModal';
-import EditCheckListItemModal from './EditCheckListItemModal';
+import AddCheckListItemModal from './CheckListEdit/AddCheckListItemModal';
+import EditCheckListItemModal from './CheckListEdit/EditCheckListItemModal';
 
 const SetModelPage = (props) => {
   const {
