@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../style/set.scss";
+import "../../style/set.scss";
 import AddCheckListItemModal from './AddCheckListItemModal';
 import EditCheckListItemModal from './EditCheckListItemModal';
 
