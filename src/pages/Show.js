@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../style/show.scss";
-import "../components/ModelPage";
-import ModelPage from "../components/ModelPage";
+import "../components/ModelSelcet";
+import ModelPage from "../components/ModelSelcet";
 
 const Show = (pros) => {
   const { getShowInfo, toggleShowSet, enteredOPID } = pros;
