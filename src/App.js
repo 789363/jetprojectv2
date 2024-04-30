@@ -1,9 +1,9 @@
 import "./bootstrap/css/bootstrap.min.css";
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import Show from "./pages/Show.js";
-import Set from "./pages/Set.js";
-import Vrm from "./pages/Vrm.js";
+import Show from "./pages/ShowOqcPage.js";
+import Set from "./pages/SetOqcPage.js";
+import Vrm from "./pages/VrmPage.js";
 
 const App = () => {
   // header欄位
