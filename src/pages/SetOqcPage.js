@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../style/set.scss";
-import SetModelPage from "../components/CheckListEdit/CheckListEdit";
+import CheckListEdit from "../components/CheckListEdit/CheckListEdit";
+import TestListEdit from "../components/TestListEdit/EditTestListItemModal";
 import RoleSwitchButton from "../components/SetOqcPage/RoleSwitchButton"
 const Set = (props) => {
   const { toggleShowSet, enteredOPID } = props;
@@ -114,9 +115,12 @@ const fetchUserModels = (opId) => {
   
         <div className="col" style={{ alignContent: "center", backgroundColor: "#DDE3EC" }}>
           {activeModel && (
-            <SetModelPage selectModel={activeModel.modelId} who={who} modelListsItems={modelListsItems} setModelListsItems={setModelListsItems} />
+            <CheckListEdit selectModel={activeModel.modelId} who={who} modelListsItems={modelListsItems} setModelListsItems={setModelListsItems} />
+            
           )}
+          
         </div>
+        
       </div>
     </>
   );
