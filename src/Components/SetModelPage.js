@@ -137,19 +137,46 @@ const handleDelete = async (itemId) => {
 };
 
   // 刪除可編輯的OPID
-  const removeOPID = (opidToRemove) => {
-    const updatedOPIDs = canEditOPID.filter((opid) => opid !== opidToRemove);
-
-    setCanEditOPID(updatedOPIDs);
-  };
+const removeOPID = async ( selectModel, opidToRemove) => {
+  console.log( selectModel,opidToRemove)
+  try {
+    const response = await fetch(`http://localhost:3000/api/moduleops/${selectModel}/${opidToRemove}`, {
+      method: 'DELETE'
+    });
+    if (response.ok) {
+      // Filter out the removed OP ID from state
+      setCanEditOPID(prevOPIDs => prevOPIDs.filter(opid => opid !== opidToRemove));
+      alert('OP ID deleted successfully');
+    } else {
+      throw new Error(`Failed to delete OP ID: Status ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error deleting OP ID:', error);
+    alert('Failed to delete OP ID: ' + error.message);
+  }
+};
 
   // 新增可編輯的OPID
-  const addOPID = () => {
-    const newOPID = prompt("Add OPID:");
+  const addOPID = async () => {
+    const newOPID = prompt("Enter new OP ID:");
     if (newOPID && newOPID.length === 6 && !canEditOPID.includes(newOPID)) {
-      setCanEditOPID(prevOPIDs => [...prevOPIDs, newOPID]);
+      try {
+        const response = await fetch(`http://localhost:3000/api/moduleops`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ op_id: newOPID }) // 根据后端API需要的格式调整
+        });
+        if (response.ok) {
+          setCanEditOPID(prevOPIDs => [...prevOPIDs, newOPID]);
+        } else {
+          throw new Error('Failed to add OP ID');
+        }
+      } catch (error) {
+        console.error('Error adding OP ID:', error);
+        alert('Failed to add OP ID: ' + error.message);
+      }
     } else {
-      alert("Invalid OPID! OPID must be exactly 6 characters long.");
+      alert("Invalid OP ID! OP ID must be exactly 6 characters long and not duplicated.");
     }
   };
   const handleReasonChange = (e) => {
@@ -308,7 +335,7 @@ return (
                         fontSize: "16px",
                         marginRight: "5px",
                       }}
-                      onClick={() => removeOPID(opid)}
+                      onClick={() => removeOPID(selectModel,opid)}
                     >
                       Delete
                     </button>
