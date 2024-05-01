@@ -12,58 +12,6 @@ const Set = (props) => {
   const [who, setWho] = useState("user");
   const [activeModel, setActiveModel] = useState(null);
   const [showEditOPID, setEditOPID] = useState(false);
-  const [measureListItems, setMeasureListItems] = useState([
-    {
-      id: 1,
-      testItem: "TestItem1",
-      USL: 10,
-      CL: 5,
-      LSL: 0,
-      Unit: "mm",
-      measureResult: "",
-      measureResultIsPass: "",
-    },
-    {
-      id: 2,
-      testItem: "TestItem2",
-      USL: 10,
-      CL: 5,
-      LSL: 0,
-      Unit: "mm",
-      measureResult: "",
-      measureResultIsPass: "",
-    },
-    {
-      id: 3,
-      testItem: "TestItem3",
-      USL: 10,
-      CL: 5,
-      LSL: 0,
-      Unit: "mm",
-      measureResult: "",
-      measureResultIsPass: "",
-    },
-    {
-      id: 4,
-      testItem: "TestItem4",
-      USL: 10,
-      CL: 5,
-      LSL: 0,
-      Unit: "mm",
-      measureResult: "",
-      measureResultIsPass: "",
-    },
-    {
-      id: 5,
-      testItem: "TestItem5",
-      USL: 10,
-      CL: 5,
-      LSL: 0,
-      Unit: "mm",
-      measureResult: "",
-      measureResultIsPass: "",
-    },
-  ]);
   useEffect(() => {
     // Fetching OP info to determine user role
     fetch(`http://localhost:3000/api/ops/${enteredOPID}`)
@@ -119,27 +67,6 @@ const fetchUserModels = (opId) => {
       .catch(error => console.error('Error fetching user models:', error));
 };
 
-{Array.isArray(modelListsItems) && modelListsItems.length > 0 && (
-  modelListsItems.map((item) => (
-      <a
-        key={item.modelId}
-        className={`list-group-item list-group-item-action ${activeModel && activeModel.modelId === item.modelId ? "active" : ""}`}
-        id={`list-${item.modelId}-list`}
-        data-toggle="list"
-        href={`#ModelId-${item.modelId}`}
-        role="tab"
-        onClick={() => handleModelSelect(item)}
-      >
-        {item.modelName}
-      </a>
-  ))
-)}
-
-  const handleShowClick = () => {
-    window.history.pushState({}, null, "/");
-    toggleShowSet(false);
-  };
-
   const handleModelSelect = (model) => {
     setActiveModel(model);
   };
@@ -161,7 +88,21 @@ const fetchUserModels = (opId) => {
         <div className="left-side">
           <div className="col" style={{ height: "100%", width: "100%" }}>
             <div className="list-group" style={{ marginLeft: "-15px", marginRight: "-15px", height: "75%", overflowY: "auto" }} id="list-tab" role="tablist">
-             
+            {Array.isArray(modelListsItems) && modelListsItems.length > 0 && (
+      modelListsItems.map((item) => (
+      <a
+        key={item.modelId}
+        className={`list-group-item list-group-item-action ${activeModel && activeModel.modelId === item.modelId ? "active" : ""}`}
+        id={`list-${item.modelId}-list`}
+        data-toggle="list"
+        href={`#ModelId-${item.modelId}`}
+        role="tab"
+        onClick={() => handleModelSelect(item)}
+      >
+        {item.modelName}
+      </a>
+  ))
+)}
             </div>
             <div style={{ height: "25%", display: "flex", flexDirection: "column", justifyContent: "space-between", marginLeft: "-10px", paddingBottom: "10px" }}>
               <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => toggleShowSet(false)}>退出編輯模式</button>
@@ -197,10 +138,6 @@ const fetchUserModels = (opId) => {
    
   )}
   </div>
-
-      
-        
-        
       </div>
     </>
   );
