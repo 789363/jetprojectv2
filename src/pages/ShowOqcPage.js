@@ -112,7 +112,7 @@ const Show = (pros) => {
         })));
     } catch (error) {
         console.error('Failed to fetch measure items:', error);
-        alert('Failed to load measure items: ' + error.message);  // 提供给用户的反馈
+     
     }
 };
 

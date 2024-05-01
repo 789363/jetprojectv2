@@ -43,7 +43,7 @@ const ModelPage = (pros) => {
             } catch (error) {
                 console.error('Failed to fetch checklists:', error);
                 
-                alert('Failed to load check items: ' + error.message);
+                alert('No exist check items: ');
             }
         };
         fetchCheckLists();
