@@ -4,7 +4,7 @@ const AddCheckListItemModal = ({ showModal, setShowModal, editItem, setEditItem,
   const handleSubmit = async () => {
     console.log(selectModel)
     if (!selectModel ) {
-      alert('模型ID未指定');
+      alert('Modal ID Not Found');
       return;
     }
 
@@ -30,11 +30,11 @@ const AddCheckListItemModal = ({ showModal, setShowModal, editItem, setEditItem,
       const result = await response.json();
       setShowModal(false);
      
-      alert('检查列表项添加成功！');
+      alert('Add CheckItems Success！');
       onRefresh();  
     } catch (error) {
       console.error('Error adding check item:', error);
-      alert('添加检查列表项时出错：' + error.message);
+      alert('Add CheckItems Error：' + error.message);
     }
   };
 
@@ -44,13 +44,13 @@ const AddCheckListItemModal = ({ showModal, setShowModal, editItem, setEditItem,
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">添加新的检查列表项</h5>
+              <h5 className="modal-title">Add CheckItems</h5>
               <button type="button" className="close" onClick={() => setShowModal(false)}>
                 <span>&times;</span>
               </button>
             </div>
             <div className="modal-body">
-              <div style={{ marginBottom: "10px" }}>检查列表项文本：</div>
+              <div style={{ marginBottom: "10px" }}>CheckItemText：</div>
               <input
                 type="text"
                 className="form-control"
@@ -72,7 +72,7 @@ const AddCheckListItemModal = ({ showModal, setShowModal, editItem, setEditItem,
                 type="button"
                 onClick={handleSubmit}
               >
-                保存
+              Save
               </button>
             </div>
           </div>

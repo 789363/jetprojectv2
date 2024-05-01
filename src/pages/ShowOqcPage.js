@@ -196,7 +196,7 @@ const Show = (pros) => {
                 alignContent: "center",
               }}
             >
-              測量項目
+              TestItemsList
             </div>
 
             <div className="test-items-div">
@@ -286,10 +286,10 @@ const Show = (pros) => {
                 alignContent: "center",
               }}
             >
-              回傳結果
+              Result
             </div>
             <div className="return-results-div">
-              <div style={{ margin: "10px" }}>保留彈性用</div>
+              <div style={{ margin: "10px" }}></div>
             </div>
           </div>
         </div>

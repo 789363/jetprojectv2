@@ -77,7 +77,7 @@ const OpIdManager = ({ selectModel, showEditOPID }) => {
                     textAlign: "center",
                     width: "100%",
                 }}>
-                    <div style={{ width: "15%", fontSize: "20px", fontWeight: "bold" }}>可編輯的OPID：</div>
+                    <div style={{ width: "15%", fontSize: "20px", fontWeight: "bold" }}>Editable OP ID：</div>
                     {canEditOPID.map((opid, index) => (
                         <div key={index} style={{
                             width: "15%",
@@ -91,7 +91,7 @@ const OpIdManager = ({ selectModel, showEditOPID }) => {
                             <button className="btn btn-danger" onClick={() => removeOPID(opid)}>Delete</button>
                         </div>
                     ))}
-                    <button className="btn btn-primary" onClick={addOPID}>+ 新增可編輯的OPID</button>
+                    <button className="btn btn-primary" onClick={addOPID}>+ Added editable OPID</button>
                 </div>
             )}
         </>
