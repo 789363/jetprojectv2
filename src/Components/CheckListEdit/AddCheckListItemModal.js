@@ -2,8 +2,9 @@ import React from 'react';
 
 const AddCheckListItemModal = ({ showModal, setShowModal, editItem, setEditItem, selectModel, onRefresh }) => { // 确保这里包括了 onRefresh
   const handleSubmit = async () => {
-    if (!selectModel || !selectModel.modelId) {
-      alert('模型ID未指定，无法添加检查项。');
+    console.log(selectModel)
+    if (!selectModel ) {
+      alert('模型ID未指定');
       return;
     }
 
@@ -18,7 +19,7 @@ const AddCheckListItemModal = ({ showModal, setShowModal, editItem, setEditItem,
           status: editItem.status,
           reasons: editItem.reasons.map(r => r.description).join(','),
           selectedReason: editItem.selectedReason,
-          module_id: selectModel.modelId,
+          module_id: selectModel,
         }),
       });
 
@@ -28,8 +29,9 @@ const AddCheckListItemModal = ({ showModal, setShowModal, editItem, setEditItem,
 
       const result = await response.json();
       setShowModal(false);
-      onRefresh();  // 使用传递来的 onRefresh 函数更新父组件的数据
+     
       alert('检查列表项添加成功！');
+      onRefresh();  
     } catch (error) {
       console.error('Error adding check item:', error);
       alert('添加检查列表项时出错：' + error.message);

@@ -226,9 +226,9 @@ const removeOPID = async ( selectModel, opidToRemove) => {
   };
 
   const fetchCheckItems = async () => {
-    if (selectModel && selectModel.modelId) {
+    if (selectModel) {
       try {
-        const response = await fetch(`http://localhost:3000/api/checkitems/${selectModel.modelId}`);
+        const response = await fetch(`http://localhost:3000/api/checkitems/${selectModel}`);
         const data = await response.json();
         const formattedData = data.map(item => ({
           ...item,
