@@ -174,7 +174,11 @@ const removeOPID = async ( selectModel, opidToRemove) => {
             alert('OP ID added successfully');
           } else if (response.status === 404) {
             alert('The requested OP ID does not exist.');
-          } else {
+            
+          }  else if (response.status === 403) {
+            alert('The requested OP ID does is exist.');
+            
+          }else {
             const errorData = await response.json(); // 假设错误信息在响应体中
             throw new Error(`Failed to add OP ID: ${errorData.message}`);
           }
