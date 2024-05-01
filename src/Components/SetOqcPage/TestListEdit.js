@@ -3,15 +3,11 @@ import React from 'react';
 const TestItems = ({ measureListItems, handleTestItemEdit, handleTestDelete }) => {
   return (
     <>
-    <div
-    style={{
-      fontSize: "24px",
-      fontWeight: "bold",
-      marginLeft: "10px",
-    }}
-  >
-    Edit OQC TestItems
-  </div>
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <h4 style={{ marginRight: "10px" }}>Edit OQC CheckLists</h4>
+
+    </div>
+
     <div className="test-items-div">
       
       <div style={{ height: '5vh' }}>

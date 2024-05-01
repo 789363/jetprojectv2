@@ -3,10 +3,10 @@ import "../style/set.scss";
 import CheckListEdit from "../components/SetOqcPage/CheckListEdit";
 import TestListEdit from "../components/SetOqcPage/TestListEdit";
 import RoleSwitchButton from "../components/SetOqcPage/RoleSwitchButton"
-import OpIdManager from '../components/SetOqcPage/OpIdManager'; // 確保路徑正確
+import OpIdManager from '../components/SetOqcPage/OpIdManager';
+import { Accordion } from 'react-bootstrap';
 const Set = (props) => {
   const { toggleShowSet, enteredOPID } = props;
-
   const [modelListsItems, setModelListsItems] = useState([]);
   const [showAllModels, setShowAllModels] = useState(false);
   const [who, setWho] = useState("user");
@@ -170,24 +170,36 @@ const fetchUserModels = (opId) => {
           </div>
         </div>
   
-        <div className="col" style={{ alignContent: "center", backgroundColor: "#DDE3EC" }}>
-          {activeModel && (
-            <CheckListEdit selectModel={activeModel.modelId} who={who} modelListsItems={modelListsItems} setModelListsItems={setModelListsItems} />
-            
-          )}
-          
-        </div>
-        <div className="col" style={{ alignContent: "center", backgroundColor: "#DDE3EC" }}>
-          {activeModel && (
-            <TestListEdit  measureListItems={measureListItems} />
-            
-          )}
-          
-        </div>
-        {activeModel && (
+        <div className="col" style={{ height: "100%", backgroundColor: "#DDE3EC", padding: "20px" }}>
+        
+  {activeModel && (
+   
+    <Accordion defaultActiveKey="0">
+      <Accordion.Item eventKey="0">
+        <Accordion.Header >Check List Edit</Accordion.Header>
+        <Accordion.Body>
+          <CheckListEdit selectModel={activeModel.modelId} who={who} modelListsItems={modelListsItems} setModelListsItems={setModelListsItems} />
+        </Accordion.Body>
+      </Accordion.Item>
+      <Accordion.Item eventKey="1">
+        <Accordion.Header>Test List Edit</Accordion.Header>
+        <Accordion.Body>
+          <TestListEdit measureListItems={measureListItems} />
+        </Accordion.Body>
+      </Accordion.Item>
+      <Accordion.Item eventKey="2">
+        <Accordion.Header>OP ID Manager</Accordion.Header>
+        <Accordion.Body>
           <OpIdManager selectModel={activeModel.modelId} showEditOPID={showEditOPID} />
-            
-          )}
+        </Accordion.Body>
+      </Accordion.Item>
+    </Accordion>
+   
+  )}
+  </div>
+
+      
+        
         
       </div>
     </>

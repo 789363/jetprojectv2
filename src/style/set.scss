@@ -99,3 +99,46 @@
     //     border-bottom: none;
     // }
 }
+
+// Accordion custom styles
+.accordion-button {
+    width: 100%; // 寬度填滿容器
+    background-color: #fff; // 白色背景
+    color: #000; // 黑色文字
+    font-weight: bold; // 文字使用粗體
+    border: 1px solid #ccc; // 定義邊框
+    border-radius: 0.25rem; // 輕微的圓角
+    padding: 0.5rem 1rem; // 內邊距
+  
+    &:not(.collapsed) {
+      background-color: #f8f9fa; // 當手風琴展開時的背景顏色
+      color: #333; // 展開時的文字顏色
+    }
+  }
+
+  
+  
+  .accordion-body {
+    background-color: #f8f9fa; // 內容背景色
+    color: #212529; // 文字顏色
+    padding: 15px; // 內容的內邊距
+  }
+  
+  .accordion-item {
+    border: 2px solid #dee2e6; // 邊框顏色和大小
+  
+    & + & {
+      border-top: none; // 移除相鄰手風琴項目之間的上邊框
+    }
+  }
+  
+  .accordion-button::after {
+    content: "+"; // 預設顯示 '+'
+    float: right; // 定位到右側
+    color: #333; // 符號的顏色
+  
+    .accordion-button:not(.collapsed)::after {
+      content: "-"; // 當展開時顯示 '-'
+    }
+  }
+  // Other styles related to your 'Set' component, if any
