@@ -50,6 +50,7 @@ const Set = (props) => {
       .catch(error => console.error('Error fetching all models:', error));
   };
  
+  
 
 const fetchUserModels = (opId) => {
     fetch(`http://localhost:3000/api/setmodules/${enteredOPID}`)
@@ -68,6 +69,7 @@ const fetchUserModels = (opId) => {
 };
 
   const handleModelSelect = (model) => {
+    console.log(model)
     setActiveModel(model);
   };
 

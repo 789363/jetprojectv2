@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 
 const TestItems = ({ selectModel }) => {
-  console.log(selectModel )
+ 
   const [measureListItems, setMeasureListItems] = useState([]);
   const [editingItem, setEditingItem] = useState(null); // 存储正在编辑的条目
 
   useEffect(() => {
+  
     fetchItems();
-  }, []);
+  }, [selectModel]);
 
   const fetchItems = async () => {
+    
     try {
-      const response = await fetch('http://localhost:3000/api/items');
+      const response = await fetch(`http://localhost:3000/api/items/${selectModel}`);
       if (!response.ok) {
         throw new Error('Failed to fetch items');
       }
