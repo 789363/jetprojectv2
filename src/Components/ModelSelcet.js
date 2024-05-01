@@ -13,7 +13,7 @@ const ModelPage = (pros) => {
 
   useEffect(() => {
     // 只有当 selectModel 是有效且特定非默认值时才执行 fetch
-    if (selectModel && selectModel !== '0') {  // 假设 '0' 是“-----Modal----”的值
+    if (selectModel && selectModel !== '0') {  
         const fetchCheckLists = async () => {
             try {
                 const response = await fetch(`http://localhost:3000/api/checkitems/${selectModel}`);
@@ -42,7 +42,7 @@ const ModelPage = (pros) => {
                 }
             } catch (error) {
                 console.error('Failed to fetch checklists:', error);
-                
+                setCheckLists([]);
                 alert('No exist check items: ');
             }
         };

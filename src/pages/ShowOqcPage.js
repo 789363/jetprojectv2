@@ -100,6 +100,7 @@ const Show = (pros) => {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const items = await response.json();
+  
         setMeasureListItems(items.map(item => ({
             id: item.item_id, // 保持一致性，使用 item_id 而不是 id
             text: item.item_name, // 确保字段名称匹配
@@ -112,7 +113,9 @@ const Show = (pros) => {
         })));
     } catch (error) {
         console.error('Failed to fetch measure items:', error);
-     
+      
+        alert('No exist measure items ');  // 提供给用户的反馈
+       
     }
 };
 
