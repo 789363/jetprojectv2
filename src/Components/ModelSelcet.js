@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../style/show.scss";
 
 const ModelPage = (pros) => {
-  const { selectModel } = pros;
+  const { selectModel, sendDataToParent  } = pros;
   const [checkLists, setCheckLists] = useState([]); 
 
   //checkList的全選
@@ -69,6 +69,25 @@ const ModelPage = (pros) => {
     );
   };
 
+  const updateCheckLists = (newStatus) => {
+    const newList = checkLists.map(item => ({
+      ...item,
+      status: newStatus,
+      selectedReason: newStatus === "FAIL" ? item.reasons[0] : "NA"
+    }));
+    setCheckLists(newList);
+  
+    // 将数据包装成指定格式的对象
+    const formattedList = newList.map(item => ({
+      name: item.text,
+      result: newStatus,
+      status: newStatus === "FAIL" ? "FAIL" : "PASS"
+    }));
+    console.log(formattedList)
+    // 将数据传递给父组件
+    sendDataToParent(formattedList);
+  };
+
   // 處理checkList原因選擇下拉選單變化
   const handleReasonChange = (checklistId, newReason) => {
     setCheckLists(
@@ -112,6 +131,8 @@ const ModelPage = (pros) => {
         checked: selectAll ? true : item.checked,
       }))
     );
+ 
+    updateCheckLists(newStatus);
   };
 
   return (
@@ -132,6 +153,7 @@ const ModelPage = (pros) => {
           <select
             value={selectAllValue}
             onChange={handleSelectAllDropdownChange}
+            
           >
             <option value="NA">NA</option>
             <option value="PASS">PASS</option>

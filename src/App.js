@@ -172,104 +172,7 @@ const checkAllFieldsValidated = () => {
   setCanUsePage(allValidated);
 };
 
-  const getShowInfo = (data) => {
-   
-    // 將OPID、MachineID、LineName的input設為disabled，但ProductName、PCBID的input不變
-    setHeaderListsItems((headerListsItems) =>
-      headerListsItems.map((headerListsItem) =>
-        headerListsItem.headertitle === "OPID" ||
-        headerListsItem.headertitle === "MachineID" ||
-        headerListsItem.headertitle === "LineName"
-          ? { ...headerListsItem, isDisabled: true }
-          : headerListsItem
-      )
-    );
-
-    const LineName = headerListsItems.filter(
-      (headerListsItems) => headerListsItems.headertitle === "LineName"
-    )[0].headervalue;
-
-    const MachineID = headerListsItems.filter(
-      (headerListsItems) => headerListsItems.headertitle === "MachineID"
-    )[0].headervalue;
-
-    // 把data["startTestTime"] (2024-4-13 11:1:53)轉成20240413110153形式，個位數補0
-    const startTestTimeFormat = startTestTime.split(" ");
-    const date = startTestTimeFormat[0].split("-");
-    const time = startTestTimeFormat[1].split(":");
-    const year = date[0];
-    const month = date[1].length === 1 ? "0" + date[1] : date[1];
-    const day = date[2].length === 1 ? "0" + date[2] : date[2];
-    const hour = time[0].length === 1 ? "0" + time[0] : time[0];
-    const minute = time[1].length === 1 ? "0" + time[1] : time[1];
-    const second = time[2].length === 1 ? "0" + time[2] : time[2];
-    const startTestTimeTemp = year + month + day + hour + minute + second;
-
-    const guid = "LINE" + LineName + startTestTimeTemp + MachineID;
-
-    const OPID = headerListsItems.filter(
-      (headerListsItems) => headerListsItems.headertitle === "OPID"
-    )[0].headervalue;
-
-    const endTestTime = data["endTestTimeFormat"];
-    const status = data["status"];
-
-    const Program = headerListsItems.filter(
-      (headerListsItems) => headerListsItems.headertitle === "Program"
-    )[0].headervalue;
-
-    const ProductName = headerListsItems.filter(
-      (headerListsItems) => headerListsItems.headertitle === "ProductName"
-    )[0].headervalue;
-
-    const SN = headerListsItems.filter(
-      (headerListsItems) => headerListsItems.headertitle === "SN"
-    )[0].headervalue;
-
-    // 將data["checkListsItems"]的陣列中每個物件只取出text(並把變數名稱取成name)、selectedReason(並把變數名稱取成result)、status
-    // 並將name、result、status組成新的陣列
-    const modelListsItems = data["measureListItems"].map((item) => {
-      const {
-        text: name,
-        measureResult: result,
-        measureResultIsPass: status,
-      } = item;
-      return { name, result, status };
-    });
-
-    const errorData = [];
-
-    // 呼叫OQC上傳用API
-    fetch("http://10.7.21.251:5072/JETAPI/OQCUpload", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        guid,
-        OPID,
-        LineName,
-        MachineID,
-        startTestTime,
-        endTestTime,
-        status,
-        Program,
-        ProductName,
-        SN,
-        modelListsItems,
-        errorData,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  };
-
-  const OPID = headerListsItems.filter(
+  const OPID =headerListsItems.filter(
     (headerListsItems) => headerListsItems.headertitle === "OPID"
   )[0].headervalue;
 
@@ -350,7 +253,8 @@ const checkAllFieldsValidated = () => {
           <Set toggleShowSet={toggleShowSet} enteredOPID={OPID} />
         ) : (
           <Show
-            getShowInfo={getShowInfo}
+          
+            headerListsItems={headerListsItems}
             toggleShowSet={toggleShowSet}
             enteredOPID={OPID}
           />

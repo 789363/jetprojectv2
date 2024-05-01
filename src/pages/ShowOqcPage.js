@@ -4,11 +4,9 @@ import "../components/ModelSelcet";
 import ModelPage from "../components/ModelSelcet";
 
 const Show = (pros) => {
-  const { getShowInfo, toggleShowSet, enteredOPID } = pros;
-  //   測量項目的內容有TestItem、USL、CL、LSL、Unit、測量結果(要自己手動輸入)、測量結果是否合格(要自己手動輸入)、測量結果是否合格
 
-
-
+  const {headerListsItems, toggleShowSet, enteredOPID } = pros;
+  console.log(pros)
   //針對checkList(操作員要做什麼事情)的動作
   const [modelListsItems, setModelListsItems] = useState([]);
   // 選擇哪個model的下拉式選單
@@ -16,15 +14,15 @@ const Show = (pros) => {
 
   //針對測量項目的動作
   const [measureListItems, setMeasureListItems] = useState([]);
-  // 開始測試時間
-  // const [startTestTime, setStartTestTime] = useState("");
+  const [startTestTime, setStartTestTime] = useState("");
+  const [endTestTime, setEndTestTime] = useState("");
 
-  // useEffect(() => {
-  //   const now = new Date();
-  //   const formattedTime = formatDateTime(now);
-  //   setStartTestTime(formattedTime);
-  // }, []);
   useEffect(() => {
+    const now = new Date();
+    setStartTestTime(formatDateTime(now)); // 設置測試開始時間
+
+
+
     const fetchModels = async () => {
       try {
         const response = await fetch('http://localhost:3000/api/modules');
@@ -33,32 +31,19 @@ const Show = (pros) => {
         setModelListsItems(models.map(model => ({
           modelId: model.module_id,
           modelName: model.module_name,
-          canEditOPID: [enteredOPID]  // 假設每個模型都可以由 enteredOPID 編輯
+          canEditOPID: [enteredOPID]
         })));
       } catch (error) {
         console.error('Fetch models error:', error);
         alert('無法從後端獲取模型資料，請檢查網絡連接。');
       }
     };
-  
     fetchModels();
-  }, [enteredOPID]);  // 依賴於 enteredOPID，以確保它變化時重新加載數據
-  // // 將日期時間格式化為 yyyy-mm-dd hh:mm:ss
+  }, [enteredOPID]);
   const formatDateTime = (date) => {
-    return (
-      date.getFullYear() +
-      "-" +
-      ("0" + (date.getMonth() + 1)).slice(-2) +
-      "-" +
-      ("0" + date.getDate()).slice(-2) +
-      " " +
-      ("0" + date.getHours()).slice(-2) +
-      ":" +
-      ("0" + date.getMinutes()).slice(-2) +
-      ":" +
-      ("0" + date.getSeconds()).slice(-2)
-    );
+    return `${date.getFullYear()}-${("0" + (date.getMonth() + 1)).slice(-2)}-${("0" + date.getDate()).slice(-2)} ${("0" + date.getHours()).slice(-2)}:${("0" + date.getMinutes()).slice(-2)}:${("0" + date.getSeconds()).slice(-2)}`;
   };
+
 
   //   輸入測量結果時，測量結果是否合格會自動判斷
   const handleMeasureResultChange = (id, newResult) => {
@@ -123,22 +108,51 @@ const Show = (pros) => {
 
   // 按下Send按鈕的事件
   const handleSendButtonClick = () => {
-    // 如果modelListsItems的每個model的checkLists的每個item的status都是PASS，status就是PASS，否則就是FAIL
-    const status = modelListsItems.every((model) =>
-      model.checkLists.every((item) => item.status === "PASS")
-    )
-      ? "PASS"
-      : "FAIL";
+    const now = new Date();
+    setEndTestTime(formatDateTime(now)); // 设置测试结束时间
+     // 获取 PCBWO 的值
+    const PCBWOValue = document.querySelector('#pcbwoSelect').value;
+    // 生成 API 需要的数据格式
+    const preparedData = {
+      guid: `LINE${headerListsItems.find(item => item.headertitle === "LineName").headervalue}${formatDateTime(now).replace(/[- :]/g, '')}${headerListsItems.find(item => item.headertitle === "MachineID").headervalue}`,
+      opid: headerListsItems.find(item => item.headertitle === "OPID").headervalue,
+      lineName: headerListsItems.find(item => item.headertitle === "LineName").headervalue,
+      machineID: headerListsItems.find(item => item.headertitle === "MachineID").headervalue,
+      startTestTime,
+      endTestTime,
+      status: 'FAIL', // 这应根据实际情况动态设置
+      program: headerListsItems.find(item => item.headertitle === "Program").headervalue,
+      productName: 'OQC_CHECKLIST',//productName
+      pcbid:  headerListsItems.find(item => item.headertitle === "SN").headervalue,
+      PCBWO: PCBWOValue,
+      
+      measurement: [
+        { name: 'PCBWO', result: PCBWOValue, status: PCBWOValue === 'NA' ? 'NA' : 'PASS' }, // PCBWO 的数据
+       
+      ],
+    };
 
-    const endTestTime = new Date();
-    const endTestTimeFormat = formatDateTime(endTestTime);
-
-    getShowInfo({
-      endTestTimeFormat,
-      status,
-      measureListItems,
+    fetch("http://10.7.21.251:5072/JETAPI/OQCUpload", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(preparedData),
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Success:", data);
+    })
+    .catch(error => {
+      console.error("Error:", error);
     });
   };
+
+  const handleDataFromModal = (data) => {
+    // 这里处理从 ModalPage 传递过来的数据
+    console.log("Received data from ModalPage:", data);
+  };
+  
   return (
     <>
       <div class="row my-4">
@@ -179,7 +193,7 @@ const Show = (pros) => {
             </button>
           </div>
 
-          <ModelPage selectModel={selectModel} />
+          <ModelPage selectModel={selectModel} sendDataToParent={handleDataFromModal}/>
         </div>
 
         <div class="col-md-6" style={{ height: "60vh" }}>
