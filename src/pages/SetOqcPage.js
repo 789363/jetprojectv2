@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "../style/set.scss";
 import CheckListEdit from "../components/SetOqcPage/CheckListEdit";
-import TestListEdit from "../components/SetOqcPage/TestListEdit/EditTestListItemModal";
+import TestListEdit from "../components/SetOqcPage/TestListEdit";
 import RoleSwitchButton from "../components/SetOqcPage/RoleSwitchButton"
-import OpIdManager from '../components/SetOqcPage/OpIdManager'; // 確保路徑正確s
+import OpIdManager from '../components/SetOqcPage/OpIdManager'; // 確保路徑正確
 const Set = (props) => {
   const { toggleShowSet, enteredOPID } = props;
 
@@ -12,7 +12,58 @@ const Set = (props) => {
   const [who, setWho] = useState("user");
   const [activeModel, setActiveModel] = useState(null);
   const [showEditOPID, setEditOPID] = useState(false);
-
+  const [measureListItems, setMeasureListItems] = useState([
+    {
+      id: 1,
+      testItem: "TestItem1",
+      USL: 10,
+      CL: 5,
+      LSL: 0,
+      Unit: "mm",
+      measureResult: "",
+      measureResultIsPass: "",
+    },
+    {
+      id: 2,
+      testItem: "TestItem2",
+      USL: 10,
+      CL: 5,
+      LSL: 0,
+      Unit: "mm",
+      measureResult: "",
+      measureResultIsPass: "",
+    },
+    {
+      id: 3,
+      testItem: "TestItem3",
+      USL: 10,
+      CL: 5,
+      LSL: 0,
+      Unit: "mm",
+      measureResult: "",
+      measureResultIsPass: "",
+    },
+    {
+      id: 4,
+      testItem: "TestItem4",
+      USL: 10,
+      CL: 5,
+      LSL: 0,
+      Unit: "mm",
+      measureResult: "",
+      measureResultIsPass: "",
+    },
+    {
+      id: 5,
+      testItem: "TestItem5",
+      USL: 10,
+      CL: 5,
+      LSL: 0,
+      Unit: "mm",
+      measureResult: "",
+      measureResultIsPass: "",
+    },
+  ]);
   useEffect(() => {
     // Fetching OP info to determine user role
     fetch(`http://localhost:3000/api/ops/${enteredOPID}`)
@@ -122,6 +173,13 @@ const fetchUserModels = (opId) => {
         <div className="col" style={{ alignContent: "center", backgroundColor: "#DDE3EC" }}>
           {activeModel && (
             <CheckListEdit selectModel={activeModel.modelId} who={who} modelListsItems={modelListsItems} setModelListsItems={setModelListsItems} />
+            
+          )}
+          
+        </div>
+        <div className="col" style={{ alignContent: "center", backgroundColor: "#DDE3EC" }}>
+          {activeModel && (
+            <TestListEdit  measureListItems={measureListItems} />
             
           )}
           

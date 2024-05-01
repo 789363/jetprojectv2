@@ -1,6 +1,6 @@
 import React from 'react';
 
-function TestItems({ measureListItems, handleTestItemEdit, handleTestDelete }) {
+function TestListEdit({ measureListItems }) {
   return (
     <div className="test-items-div">
       {measureListItems.map((item) => (
@@ -11,8 +11,8 @@ function TestItems({ measureListItems, handleTestItemEdit, handleTestDelete }) {
           <div className="test-items-body-each-text">{item.LSL}</div>
           <div className="test-items-body-each-text">{item.Unit}</div>
           <div className="test-items-body-each-text">
-            <button className="btn btn-info" onClick={() => handleTestItemEdit(item)}>編輯</button>
-            <button className="btn btn-danger" onClick={() => handleTestDelete(item.id)}>刪除</button>
+            <button className="btn btn-info" >編輯</button>
+            <button className="btn btn-danger" >刪除</button>
           </div>
         </div>
       ))}
@@ -20,4 +20,4 @@ function TestItems({ measureListItems, handleTestItemEdit, handleTestDelete }) {
   );
 }
 
-export default TestItems;
+export default TestListEdit;
