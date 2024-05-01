@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../style/set.scss";
-import CheckListEdit from "../components/CheckListEdit/CheckListEdit";
-import TestListEdit from "../components/TestListEdit/EditTestListItemModal";
+import CheckListEdit from "../components/SetOqcPage/CheckListEdit";
+import TestListEdit from "../components/SetOqcPage/TestListEdit/EditTestListItemModal";
 import RoleSwitchButton from "../components/SetOqcPage/RoleSwitchButton"
 const Set = (props) => {
   const { toggleShowSet, enteredOPID } = props;

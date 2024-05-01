@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "../../style/set.scss";
-import AddCheckListItemModal from './AddCheckListItemModal';
-import EditCheckListItemModal from './EditCheckListItemModal';
-
+import AddCheckListItemModal from './CheckListEdit/AddCheckListItemModal';
+import EditCheckListItemModal from './CheckListEdit/EditCheckListItemModal';
+import OpIdManager from './OpIdManager'; // 確保路徑正確s
 const SetModelPage = (props) => {
   const {
     selectModel,
@@ -303,81 +303,7 @@ return (
           
         </div>
       ))}
-       {showEditOPID ? (
-            <>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  marginTop: "20px",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  textAlign: "center",
-                  width: "100%",
-                }}
-              >
-                <div
-                  style={{
-                    width: "15%",
-                    fontSize: "20px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  可編輯的OPID：
-                 
-                  
-                </div>
-                {canEditOPID.map((opid, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      width: "15%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginTop: "5px",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    <div>{opid}</div>
-                    <button
-                      class="btn btn-info"
-                      style={{
-                        backgroundColor: "#FB5144",
-                        border: "0px",
-                        borderRadius: "10px",
-                        width: "10vh",
-                        boxShadow: "0px 2px 2px #ccc",
-                        fontSize: "16px",
-                        marginRight: "5px",
-                      }}
-                      onClick={() => removeOPID(selectModel,opid)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  class="btn btn-info"
-                  style={{
-                    backgroundColor: "#fff",
-                    color: "#000",
-                    border: "1px solid #ccc",
-                    borderRadius: "10px",
-                    boxShadow: "0px 2px 2px #ccc",
-                    fontSize: "16px",
-                    marginTop: "10px",
-                  }}
-                  onClick={addOPID}
-                >
-                  + 新增可編輯的OPID
-                </button>
-              </div>
-            </>
-          ) : (
-            <div></div>
-          )}
+     <OpIdManager selectModel={selectModel} showEditOPID={showEditOPID} />
     </div>
         <AddCheckListItemModal
       showModal={showModal && editItem.isNew}
