@@ -84,6 +84,95 @@ const fetchUserModels = (opId) => {
     setWho(value);
   };
 
+
+// 新增ModalName的事件
+const addModalName = () => {
+  const modelName = prompt("请输入新模型名称:");
+  if (modelName) {
+    fetch('http://localhost:3000/api/modules', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ module_name: modelName })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data) { // 确保数据有效
+        alert('模型添加成功!');
+        setModelListsItems(prevItems => [...prevItems, { modelId: data.id, modelName: modelName }]); // 假设后端返回的 data 包含 id
+        setActiveModel({ modelId: data.id, modelName: modelName }); // 设置新添加的模型为当前活跃模型
+      } else {
+        throw new Error('Invalid response data'); // 处理无效数据
+      }
+    })
+    .catch(error => {
+      console.error('添加模型失败:', error);
+      alert('添加模型失败');
+    });
+  }
+};
+
+
+
+  // 編輯ModalName的事件
+  const editModalName = (id) => {
+    const newModelName = prompt("Input New Modal Name:");
+    if (newModelName) {
+      fetch(`http://localhost:3000/api/modules/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ module_name: newModelName })
+      })
+      .then(response => response.json())
+      .then(updatedModule => {
+        if (updatedModule && updatedModule.module_id) {
+          alert('Update Success');
+          const updatedItems = modelListsItems.map(item => {
+            if (item.modelId === updatedModule.module_id) {
+              return { ...item, modelName: updatedModule.module_name };
+            }
+            return item;
+          });
+          setModelListsItems(updatedItems);
+          setActiveModel(updatedModule); // 更新活跃模型
+        } else {
+          alert('Update Success');
+        }
+      })
+      .catch(error => {
+        console.error('更新模型名称失败:', error);
+        alert('Update Fail Please Try Again');
+      });
+    }
+  };
+  
+  
+  
+
+  // 刪除ModalName的事件
+  const deleteModalName = (id) => {
+    if (window.confirm("Are You Sure Whant Delete This Modal?")) {
+      fetch(`http://localhost:3000/api/modules/${id}`, {
+        method: 'DELETE'
+      })
+      .then(() => {
+        alert('Delete Success');
+        setModelListsItems(prevItems => prevItems.filter(item => item.modelId !== id));
+        if (activeModel && activeModel.modelId === id) {
+          setActiveModel(null);
+        }
+      })
+      .catch(error => {
+        console.error('删除模型失败:', error);
+        alert('Delete Fail Please Try Again');
+      });
+    }
+  };
+  
+
   return (
     <>
       <div className="row">
@@ -92,9 +181,11 @@ const fetchUserModels = (opId) => {
             <div className="list-group" style={{ marginLeft: "-15px", marginRight: "-15px", height: "75%", overflowY: "auto" }} id="list-tab" role="tablist">
             {Array.isArray(modelListsItems) && modelListsItems.length > 0 && (
       modelListsItems.map((item) => (
+        <>
+        <div className={`list-group-item list-group-item-action ${activeModel && activeModel.modelId === item.modelId ? "active" : ""}`} style={{display:"flex",alignItems:"center"}}>
       <a
         key={item.modelId}
-        className={`list-group-item list-group-item-action ${activeModel && activeModel.modelId === item.modelId ? "active" : ""}`}
+        className={`list1-group-item list-group-item-action ${activeModel && activeModel.modelId === item.modelId ? "active" : ""}`}
         id={`list-${item.modelId}-list`}
         data-toggle="list"
         href={`#ModelId-${item.modelId}`}
@@ -103,11 +194,16 @@ const fetchUserModels = (opId) => {
       >
         {item.modelName}
       </a>
+      <div  style={{cursor:"pointer",marginRight:"10px"}} onClick={()=> editModalName(item.modelId)}>✏️</div>
+      <div style={{cursor:"pointer",fontSize:"24px",marginRight:"10px"}} onClick={()=> deleteModalName(item.modelId)}>-</div>
+      </div>
+      </>
   ))
 )}
             </div>
             <div style={{ height: "25%", display: "flex", flexDirection: "column", justifyContent: "space-between", marginLeft: "-10px", paddingBottom: "10px" }}>
-              <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => toggleShowSet(false)}>退出編輯模式</button>
+            <button type="button" className="btn btn-info" style={buttonStyle} onClick={()=>addModalName()} >Add Modal</button>
+              <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => toggleShowSet(false)}>Exit edit mode</button>
               <RoleSwitchButton who={who} onSwitch={handleCanEditOPIDButtonClick} style={buttonStyle} />
             </div>
           </div>

@@ -9,7 +9,15 @@
     background-color: #B6CADD; 
     color: #3668A4;
     border-color: #B6CADD; 
+    border: 0px;
   }
+
+.list1-group-item-action.active {
+  background-color: #B6CADD; 
+  color: #3668A4;
+  border-color: #B6CADD; 
+  border: 0px;
+}
 
 .model-checklist-div {
     overflow-y: auto;

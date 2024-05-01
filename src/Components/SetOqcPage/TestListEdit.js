@@ -115,7 +115,7 @@ const TestItems = ({ selectModel }) => {
   return (
     <>
       <div style={{ display: "flex", alignItems: "center" }}>
-        <h4 style={{ marginRight: "10px" }}>Edit OQC CheckLists</h4>
+        <h4 style={{ marginRight: "10px" }}>Edit OQC TestLists</h4>
         <button
           type="button"
           className="btn btn-info"
@@ -130,13 +130,29 @@ const TestItems = ({ selectModel }) => {
           }}
           onClick={handleAddCheckListItem}
         >
-          Add CheckListItem
+          Add TestListItem
         </button>
       </div>
-
+        
       <div className="test-items-div">
+
+      <div
+          style={{
+                      height: "5vh",
+                    }}
+                  >
+                    <div className="test-items-title-div">
+                      <div className="test-items-title-text">TestItem</div>
+                      <div className="test-items-title-text">USL</div>
+                      <div className="test-items-title-text">CL</div>
+                      <div className="test-items-title-text">LSL</div>
+                      <div className="test-items-title-text">Unit</div>
+                      <div className="test-items-title-text">Action</div>
+                    </div>
+      </div>
+      
         {measureListItems.map((item) => (
-          <div key={item.id} className="test-items-body-each-div">
+          <div key={item.id} className="test-items-body-each-div" >
             {editingItem && editingItem.id === item.id ? (
               <>
                 <input value={editingItem.testItem} onChange={(e) => handleInputChange(e, 'testItem')} />
@@ -148,13 +164,33 @@ const TestItems = ({ selectModel }) => {
               </>
             ) : (
               <>
-                <div>{item.testItem}</div>
-                <div>{item.USL}</div>
-                <div>{item.CL}</div>
-                <div>{item.LSL}</div>
-                <div>{item.Unit}</div>
-                <button onClick={() => handleEditClick(item)}>Edit</button>
-                <button onClick={() => handleTestDelete(item.id)}>Delete</button>
+                <div className="test-items-body-each-text">{item.testItem}</div>
+                <div className="test-items-body-each-text">{item.USL}</div>
+                <div className="test-items-body-each-text">{item.CL}</div>
+                <div className="test-items-body-each-text">{item.LSL}</div>
+                <div className="test-items-body-each-text">{item.Unit}</div>
+                <div className="test-items-body-each-text" style={{display:"flex"}}>
+                <button class="btn btn-info"
+                              style={{
+                                backgroundColor: "#30B16C",
+                                border: "0px",
+                                borderRadius: "10px",
+                                width: "10vh",
+                                boxShadow: "0px 2px 2px #ccc",
+                                fontSize: "16px",
+                                marginRight: "10px",
+                              }} onClick={() => handleEditClick(item)}>Edit</button>
+                <button class="btn btn-info"
+                              style={{
+                                backgroundColor: "#FB5144",
+                                border: "0px",
+                                borderRadius: "10px",
+                                width: "10vh",
+                                boxShadow: "0px 2px 2px #ccc",
+                                fontSize: "16px",
+                                marginRight: "5px",
+                              }} onClick={() => handleTestDelete(item.id)}>Delete</button>
+                </div>
               </>
             )}
           </div>

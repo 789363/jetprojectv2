@@ -7,7 +7,7 @@ const RoleSwitchButton = ({ who, style }) => {
       className="btn btn-info"
       style={{ ...style, pointerEvents: "none", opacity: 0.7 }} // 添加不可点击的样式
     >
-      {who === "manage" ? "Management模式" : "User模式"}
+      {who === "manage" ? "Management" : "User"}
     </button>
   );
 };
