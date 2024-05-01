@@ -22,6 +22,7 @@ const TestItems = ({ selectModel }) => {
       setMeasureListItems(formattedItems);
     } catch (error) {
       console.error(error);
+      setMeasureListItems([])
     }
   };
 

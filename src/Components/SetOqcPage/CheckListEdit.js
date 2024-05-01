@@ -31,6 +31,7 @@ useEffect(() => {
         }));
         setCheckLists(formattedData);
       } catch (error) {
+        setCheckLists([])
         console.error("Failed to fetch test items:", error);
       }
     }

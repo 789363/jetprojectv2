@@ -18,6 +18,7 @@ const OpIdManager = ({ selectModel, showEditOPID }) => {
                     }
                 } catch (error) {
                     console.error("Failed to fetch OPIDs:", error);
+                    setCanEditOPID([])
                 }
             }
         };
