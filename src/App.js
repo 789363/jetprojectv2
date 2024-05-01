@@ -116,7 +116,7 @@ const App = () => {
       }
 
       if (!isValid) {
-        alert(`${headertitle} 格式错误，请重新输入`);
+        alert(`${headertitle} Format error, please re-enter`);
         return;
       }
 
@@ -129,11 +129,11 @@ const App = () => {
             lockInput(id, headertitle);
           } else {
             // 如果 API 调用失败，给出提示
-            alert(`${headertitle} 验证失败，请确认数据正确性`);
+            alert(`${headertitle} Verify Error Please Try Again`);
           }
         } catch (error) {
           console.error('网络请求错误:', error);
-          alert('网络错误，请稍后再试');
+          alert('Network error, please try again later');
         }
       } else {
      
