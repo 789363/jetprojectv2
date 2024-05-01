@@ -1,11 +1,27 @@
 import React from 'react';
 
 const TestItems = ({ measureListItems, handleTestItemEdit, handleTestDelete }) => {
+  
   return (
     <>
     <div style={{ display: "flex", alignItems: "center" }}>
       <h4 style={{ marginRight: "10px" }}>Edit OQC CheckLists</h4>
-
+      <button
+        type="button"
+        className="btn btn-info"
+        style={{
+          backgroundColor: "#F3934D",
+          border: "0px",
+          borderRadius: "10px",
+          boxShadow: "0px 2px 2px #ccc",
+          fontSize: "16px",
+          height: "40px",
+          marginBottom:"10px"
+        }}
+       
+      >
+        Add CheckListItem
+      </button>
     </div>
 
     <div className="test-items-div">

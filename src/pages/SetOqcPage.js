@@ -161,7 +161,7 @@ const fetchUserModels = (opId) => {
         <div className="left-side">
           <div className="col" style={{ height: "100%", width: "100%" }}>
             <div className="list-group" style={{ marginLeft: "-15px", marginRight: "-15px", height: "75%", overflowY: "auto" }} id="list-tab" role="tablist">
-              {/* list rendering logic remains unchanged */}
+             
             </div>
             <div style={{ height: "25%", display: "flex", flexDirection: "column", justifyContent: "space-between", marginLeft: "-10px", paddingBottom: "10px" }}>
               <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => toggleShowSet(false)}>退出編輯模式</button>
