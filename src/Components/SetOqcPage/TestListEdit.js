@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
-const TestItems = () => {
+const TestItems = ({ selectModel }) => {
+  console.log(selectModel )
   const [measureListItems, setMeasureListItems] = useState([]);
+  const [editingItem, setEditingItem] = useState(null); // 存储正在编辑的条目
 
   useEffect(() => {
     fetchItems();
@@ -9,12 +11,12 @@ const TestItems = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/items'); // 假設這是你的API端點
+      const response = await fetch('http://localhost:3000/api/items');
       if (!response.ok) {
         throw new Error('Failed to fetch items');
       }
       const data = await response.json();
-      const formattedItems = formatItems(data); // 將取得的資料格式化
+      const formattedItems = formatItems(data);
       setMeasureListItems(formattedItems);
     } catch (error) {
       console.error(error);
@@ -22,9 +24,8 @@ const TestItems = () => {
   };
 
   const formatItems = (items) => {
-    // 將從 API 取得的項目資料轉換成指定格式
-    return items.map((item, index) => ({
-      id: index + 1,
+    return items.map((item) => ({
+      id: item.item_id,
       testItem: item.item_name,
       USL: item.USL,
       CL: item.CL,
@@ -35,18 +36,34 @@ const TestItems = () => {
     }));
   };
 
-  const handleTestItemEdit = async (item) => {
+  const handleEditClick = (item) => {
+    setEditingItem({ ...item });
+  };
+
+  const handleInputChange = (e, field) => {
+    setEditingItem(prev => ({ ...prev, [field]: e.target.value }));
+  };
+
+  const handleSave = async () => {
+    if (!editingItem) return;
     try {
-      const response = await fetch(`http://localhost:3000/api/items/${item.id}`, {
+      const updateData = {
+        item_name: editingItem.testItem, // 只更新item_name
+        unit: editingItem.Unit,          // 只更新unit
+        module_id:selectModel ,
+      }
+
+      const response = await fetch(`http://localhost:3000/api/items/${editingItem.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(item)
+        body: JSON.stringify(updateData)
       });
       if (!response.ok) {
         throw new Error('Failed to update item');
       }
+      setEditingItem(null);
       fetchItems(); // 重新获取列表以更新UI
     } catch (error) {
       console.error('Error:', error.message);
@@ -75,7 +92,7 @@ const TestItems = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          // 在這裡添加你要新增的項目的資料
+          module_id:selectModel ,
           item_name: 'New CheckListItem',
           USL: 10,
           CL: 5,
@@ -86,7 +103,7 @@ const TestItems = () => {
       if (!response.ok) {
         throw new Error('Failed to add check list item');
       }
-      fetchItems(); // 新增後重新获取列表以更新UI
+      fetchItems(); // 新增后重新获取列表以更新UI
     } catch (error) {
       console.error('Error:', error.message);
     }
@@ -107,72 +124,38 @@ const TestItems = () => {
             fontSize: "16px",
             height: "40px",
             marginBottom:"10px"
-            
           }}
-          onClick={handleAddCheckListItem} // 新增按鈕的點擊事件
+          onClick={handleAddCheckListItem}
         >
           Add CheckListItem
         </button>
       </div>
 
       <div className="test-items-div">
-        <div style={{ height: '5vh' }}>
-          <div className="test-items-title-div">
-            <div className="test-items-title-text">TestItem</div>
-            <div className="test-items-title-text">USL</div>
-            <div className="test-items-title-text">CL</div>
-            <div className="test-items-title-text">LSL</div>
-            <div className="test-items-title-text">Unit</div>
-            <div className="test-items-title-text">Action</div>
+        {measureListItems.map((item) => (
+          <div key={item.id} className="test-items-body-each-div">
+            {editingItem && editingItem.id === item.id ? (
+              <>
+                <input value={editingItem.testItem} onChange={(e) => handleInputChange(e, 'testItem')} />
+                <input value={editingItem.USL} onChange={(e) => handleInputChange(e, 'USL')} />
+                <input value={editingItem.CL} onChange={(e) => handleInputChange(e, 'CL')} />
+                <input value={editingItem.LSL} onChange={(e) => handleInputChange(e, 'LSL')} />
+                <input value={editingItem.Unit} onChange={(e) => handleInputChange(e, 'Unit')} />
+                <button onClick={handleSave}>Save</button>
+              </>
+            ) : (
+              <>
+                <div>{item.testItem}</div>
+                <div>{item.USL}</div>
+                <div>{item.CL}</div>
+                <div>{item.LSL}</div>
+                <div>{item.Unit}</div>
+                <button onClick={() => handleEditClick(item)}>Edit</button>
+                <button onClick={() => handleTestDelete(item.id)}>Delete</button>
+              </>
+            )}
           </div>
-        </div>
-        <div className="test-items-body-div">
-          {measureListItems.map((item) => (
-            <div key={item.id} className="test-items-body-each-div">
-              <div className="test-items-body-each-text">{item.testItem}</div>
-              <div className="test-items-body-each-text">{item.USL}</div>
-              <div className="test-items-body-each-text">{item.CL}</div>
-              <div className="test-items-body-each-text">{item.LSL}</div>
-              <div className="test-items-body-each-text">{item.Unit}</div>
-              <div className="test-items-body-each-text" style={{display:"flex" ,justifyContent:"center"}}>
-                <button
-                  className="btn btn-info"
-                  style={{
-                    backgroundColor: '#30B16C',
-                    border: '0px',
-                    borderRadius: '10px',
-                    minWidth: '80px', // 最小寬度
-                    minHeight: '40px', // 最小高度
-                    boxShadow: '0px 2px 2px #ccc',
-                    fontSize: '16px',
-                    marginRight:'10px',
-      
-                    
-                  }}
-                  onClick={() => handleTestItemEdit(item)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="btn btn-info"
-                  style={{
-                    backgroundColor: '#FB5144',
-                    border: '0px',
-                    borderRadius: '10px',
-                    minWidth: '80px', // 最小寬度
-                    minHeight: '40px', // 最小高度
-                    boxShadow: '0px 2px 2px #ccc',
-                    fontSize: '16px',
-                    // marginRight: '5px',
-                  }}
-                  onClick={() => handleTestDelete(item.id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        ))}
       </div>
     </>
   );

@@ -184,7 +184,7 @@ const fetchUserModels = (opId) => {
       <Accordion.Item eventKey="1">
         <Accordion.Header>Test List Edit</Accordion.Header>
         <Accordion.Body>
-          <TestListEdit measureListItems={measureListItems} />
+          <TestListEdit selectModel={activeModel.modelId} />
         </Accordion.Body>
       </Accordion.Item>
       <Accordion.Item eventKey="2">
