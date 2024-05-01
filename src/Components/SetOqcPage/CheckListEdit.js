@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../../style/set.scss";
 import AddCheckListItemModal from './CheckListEdit/AddCheckListItemModal';
 import EditCheckListItemModal from './CheckListEdit/EditCheckListItemModal';
-import OpIdManager from './OpIdManager'; // 確保路徑正確s
+
 const SetModelPage = (props) => {
   const {
     selectModel,
@@ -39,37 +39,6 @@ useEffect(() => {
   fetchTestItems();
 }, [selectModel]);
 
-// Fetch OPIDs based on the modelId
-useEffect(() => {
-  const fetchOpIds = async () => {
-    if (selectModel) {
-      try {
-        const response = await fetch(`http://localhost:3000/api/moduleops/${selectModel}`);
-        if (response.ok) {
-          const data = await response.json();
-          // 检查 data 是否为数组
-          if (Array.isArray(data)) {
-            // 如果是数组，提取所有 op_id
-            setCanEditOPID(data.map(op => op.op_id));
-          } else if (data && data.op_id) {
-            // 如果不是数组但是 data 有 op_id 属性，假定它是单个对象
-            setCanEditOPID([data.op_id]);
-          } else {
-            // 如果 data 既不是数组也没有 op_id，可能是错误的数据格式
-            console.error("Unexpected data format:", data);
-          }
-        } else {
-          throw new Error('Failed to fetch OPIDs');
-        }
-      } catch (error) {
-        console.error("Failed to fetch OPIDs:", error);
-      }
-    }
-  };
-  fetchOpIds();
-}, [selectModel]);
-
-
   const [editItem, setEditItem] = useState({
     id: 0,
     text: "",
@@ -83,16 +52,6 @@ useEffect(() => {
 
   // 單獨測項修改
   const [showModal, setShowModal] = useState(false);
-
-  // 可編輯的OPID，預設是看不到的，要按使用者按鈕才可以看到
-  const [showEditOPID, setEditOPID] = useState(false);
-
-  const [canEditOPID, setCanEditOPID] = useState([]);
-
-
-  useEffect(() => {
-    who === "manage" ? setEditOPID(true) : setEditOPID(false);
-  }, [who]);
 
   // 新增檢查項目
   const handleAddCheckItem = () => {
@@ -136,63 +95,7 @@ const handleDelete = async (itemId) => {
   }
 };
 
-  // 刪除可編輯的OPID
-const removeOPID = async ( selectModel, opidToRemove) => {
-  console.log( selectModel,opidToRemove)
-  try {
-    const response = await fetch(`http://localhost:3000/api/moduleops/${selectModel}/${opidToRemove}`, {
-      method: 'DELETE'
-    });
-    if (response.ok) {
-      // Filter out the removed OP ID from state
-      setCanEditOPID(prevOPIDs => prevOPIDs.filter(opid => opid !== opidToRemove));
-      alert('OP ID deleted successfully');
-    } else {
-      throw new Error(`Failed to delete OP ID: Status ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error deleting OP ID:', error);
-    alert('Failed to delete OP ID: ' + error.message);
-  }
-};
 
-  // 新增可編輯的OPID
-  const addOPID = async () => {
-    const newOPID = prompt("Enter new OP ID:");
-    if (newOPID && newOPID.length === 6 && !canEditOPID.includes(newOPID)) {
-      // 确保 selectModel 是有效的，并且从中获取 moduleId
-      if (selectModel ) {
-        try {
-          const response = await fetch(`http://localhost:3000/api/moduleops`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ module_id: selectModel , op_id: newOPID })  // 使用 selectModel 中的 modelId
-          });
-          if (response.ok) {
-            const data = await response.json(); // 解析响应体获取新添加的数据
-            setCanEditOPID(prevOPIDs => [...prevOPIDs, data.op_id]); // 假设后端返回完整的对象
-            alert('OP ID added successfully');
-          } else if (response.status === 404) {
-            alert('The requested OP ID does not exist.');
-            
-          }  else if (response.status === 403) {
-            alert('The requested OP ID does is exist.');
-            
-          }else {
-            const errorData = await response.json(); // 假设错误信息在响应体中
-            throw new Error(`Failed to add OP ID: ${errorData.message}`);
-          }
-        } catch (error) {
-          console.error('Error adding OP ID:', error);
-          alert('Failed to add OP ID: ' + error.message);
-        }
-      } else {
-        alert("Model ID is not selected or invalid.");
-      }
-    } else {
-      alert("Invalid OP ID! OP ID must be exactly 6 characters long and not duplicated.");
-    }
-  };
   const handleReasonChange = (e) => {
     setEditItem({ ...editItem, selectedReason: e.target.value });
   };
@@ -303,7 +206,7 @@ return (
           
         </div>
       ))}
-     <OpIdManager selectModel={selectModel} showEditOPID={showEditOPID} />
+    
     </div>
         <AddCheckListItemModal
       showModal={showModal && editItem.isNew}

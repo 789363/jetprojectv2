@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 
 const OpIdManager = ({ selectModel, showEditOPID }) => {
     const [canEditOPID, setCanEditOPID] = useState([]);
-
-    useEffect(() => {
+    console.log(selectModel,123)
+    useEffect(() => {   
         const fetchOpIds = async () => {
             if (selectModel) {
                 try {

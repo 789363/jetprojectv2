@@ -3,6 +3,7 @@ import "../style/set.scss";
 import CheckListEdit from "../components/SetOqcPage/CheckListEdit";
 import TestListEdit from "../components/SetOqcPage/TestListEdit/EditTestListItemModal";
 import RoleSwitchButton from "../components/SetOqcPage/RoleSwitchButton"
+import OpIdManager from '../components/SetOqcPage/OpIdManager'; // 確保路徑正確s
 const Set = (props) => {
   const { toggleShowSet, enteredOPID } = props;
 
@@ -10,6 +11,7 @@ const Set = (props) => {
   const [showAllModels, setShowAllModels] = useState(false);
   const [who, setWho] = useState("user");
   const [activeModel, setActiveModel] = useState(null);
+  const [showEditOPID, setEditOPID] = useState(false);
 
   useEffect(() => {
     // Fetching OP info to determine user role
@@ -30,6 +32,9 @@ const Set = (props) => {
       .catch(error => console.error('Error fetching OP info:', error));
   }, [enteredOPID]);
 
+  useEffect(() => {
+    who === "manage" ? setEditOPID(true) : setEditOPID(false);
+  }, [who]);
   const fetchAllModels = () => {
     fetch(`http://localhost:3000/api/setmodules/`)
       .then(response => response.json())
@@ -45,6 +50,7 @@ const Set = (props) => {
   
       .catch(error => console.error('Error fetching all models:', error));
   };
+ 
 
 const fetchUserModels = (opId) => {
     fetch(`http://localhost:3000/api/setmodules/${enteredOPID}`)
@@ -120,6 +126,10 @@ const fetchUserModels = (opId) => {
           )}
           
         </div>
+        {activeModel && (
+          <OpIdManager selectModel={activeModel.modelId} showEditOPID={showEditOPID} />
+            
+          )}
         
       </div>
     </>
