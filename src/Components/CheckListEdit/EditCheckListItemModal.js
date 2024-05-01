@@ -44,7 +44,7 @@ const EditCheckListItemModal = ({
         ...currentItem,
         reasons: [...currentItem.reasons, newReason]
       }));
-
+      handleSave()
       alert('Reason added successfully');
     } catch (error) {
       console.error('Error adding reason:', error);
@@ -67,7 +67,7 @@ const EditCheckListItemModal = ({
         ...currentItem,
         reasons: currentItem.reasons.filter(reason => reason.reason_id !== reasonId)
       }));
-  
+      handleSave()
       alert('Reason deleted successfully');
     } catch (error) {
       console.error('Error deleting reason:', error);

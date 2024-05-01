@@ -200,35 +200,37 @@ const removeOPID = async ( selectModel, opidToRemove) => {
   const handleAddReason = async () => {
     const newReasonDescription = prompt("Enter new reason:");
     if (newReasonDescription && editItem.id) {
-      try {
-        const response = await fetch(`http://localhost:3000/api/reasons`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            description: newReasonDescription,
-            checkitem_id: editItem.id
-          }),
-        });
-  
-        if (!response.ok) {
-          throw new Error(`Failed to add reason: ${response.statusText}`);
-        }
-  
-        const newReason = await response.json();
-        setEditItem(prev => ({
-          ...prev,
-          reasons: [...prev.reasons, { id: newReason.reason_id, description: newReason.description }]
-        }));
-        alert('Reason added successfully');
-      } catch (error) {
-        console.error('Error adding reason:', error);
-        alert(`Failed to add reason: ${error.message}`);
-      }
-    }
-  };
+        try {
+            const response = await fetch(`http://localhost:3000/api/reasons`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    description: newReasonDescription,
+                    checkitem_id: editItem.id
+                }),
+            });
 
+            if (!response.ok) {
+                throw new Error(`Failed to add reason: ${response.statusText}`);
+            }
+
+            const newReason = await response.json();
+            setCheckLists(prevCheckLists =>
+                prevCheckLists.map(item =>
+                    item.id === editItem.id
+                    ? { ...item, reasons: [...item.reasons, { id: newReason.reason_id, description: newReason.description }] }
+                    : item
+                )
+            );
+            alert('Reason added successfully');
+        } catch (error) {
+            console.error('Error adding reason:', error);
+            alert(`Failed to add reason: ${error.message}`);
+        }
+    }
+}
   const fetchCheckItems = async () => {
     if (selectModel) {
       try {
