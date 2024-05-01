@@ -22,7 +22,6 @@ const TestItems = () => {
   };
 
   const formatItems = (items) => {
-    console.log(items)
     // 將從 API 取得的項目資料轉換成指定格式
     return items.map((item, index) => ({
       id: index + 1,
@@ -68,6 +67,31 @@ const TestItems = () => {
     }
   };
 
+  const handleAddCheckListItem = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/items`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          // 在這裡添加你要新增的項目的資料
+          item_name: 'New CheckListItem',
+          USL: 10,
+          CL: 5,
+          LSL: 0,
+          unit: 'mm',
+        })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add check list item');
+      }
+      fetchItems(); // 新增後重新获取列表以更新UI
+    } catch (error) {
+      console.error('Error:', error.message);
+    }
+  };
+
   return (
     <>
       <div style={{ display: "flex", alignItems: "center" }}>
@@ -83,7 +107,9 @@ const TestItems = () => {
             fontSize: "16px",
             height: "40px",
             marginBottom:"10px"
+            
           }}
+          onClick={handleAddCheckListItem} // 新增按鈕的點擊事件
         >
           Add CheckListItem
         </button>
@@ -108,17 +134,20 @@ const TestItems = () => {
               <div className="test-items-body-each-text">{item.CL}</div>
               <div className="test-items-body-each-text">{item.LSL}</div>
               <div className="test-items-body-each-text">{item.Unit}</div>
-              <div className="test-items-body-each-text">
+              <div className="test-items-body-each-text" style={{display:"flex" ,justifyContent:"center"}}>
                 <button
                   className="btn btn-info"
                   style={{
                     backgroundColor: '#30B16C',
                     border: '0px',
                     borderRadius: '10px',
-                    width: '80px', // 調整寬度
+                    minWidth: '80px', // 最小寬度
+                    minHeight: '40px', // 最小高度
                     boxShadow: '0px 2px 2px #ccc',
                     fontSize: '16px',
-                    marginRight: '10px',
+                    marginRight:'10px',
+      
+                    
                   }}
                   onClick={() => handleTestItemEdit(item)}
                 >
@@ -130,10 +159,11 @@ const TestItems = () => {
                     backgroundColor: '#FB5144',
                     border: '0px',
                     borderRadius: '10px',
-                    width: '80px', // 調整寬度
+                    minWidth: '80px', // 最小寬度
+                    minHeight: '40px', // 最小高度
                     boxShadow: '0px 2px 2px #ccc',
                     fontSize: '16px',
-                    marginRight: '5px',
+                    // marginRight: '5px',
                   }}
                   onClick={() => handleTestDelete(item.id)}
                 >
