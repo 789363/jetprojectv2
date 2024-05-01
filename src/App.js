@@ -95,40 +95,85 @@ const App = () => {
     if (event.key === "Enter") {
       const { headertitle, headervalue, id } = headerListsItem;
       let isValid = false;
+      let url = '';
 
       switch (headertitle) {
+        case "OPID":
+          isValid = headervalue.length === 6;
+          if (isValid) {
+            url = `http://localhost:3000/api/ops/${headervalue}`; // 准备调用 API 验证 OPID
+          }
+          break;
         case "MachineID":
         case "LineName":
           isValid = headervalue.length === 4;
           break;
-        case "ProductName":
-          isValid = headervalue.length === 14;
+        case "SN":
+          isValid = headervalue.length === 14; // SN 验证长度为 14，但不锁定
           break;
         default:
-          isValid = true;
+          isValid = true; // 其他字段默认为有效
       }
 
       if (!isValid) {
-        alert(`${headertitle} 格式不正確，請再次確認`);
+        alert(`${headertitle} 格式错误，请重新输入`);
+        return;
+      }
+
+      if (url) {
+        // 如果有 URL，则进行 API 调用
+        try {
+          const response = await fetch(url);
+          if (response.ok) {
+            // 如果 API 调用成功，锁定该输入框
+            lockInput(id, headertitle);
+          } else {
+            // 如果 API 调用失败，给出提示
+            alert(`${headertitle} 验证失败，请确认数据正确性`);
+          }
+        } catch (error) {
+          console.error('网络请求错误:', error);
+          alert('网络错误，请稍后再试');
+        }
       } else {
-        setHeaderListsItems(items =>
-          items.map(item => item.id === id ? { ...item, isDisabled: true } : item)
-        );
+     
+        if (headertitle === "MachineID" || headertitle === "LineName") {
+          lockInput(id, headertitle);
+        }
+        // 对于不涉及 API 调用的字段，调用验证函数检查所有字段是否已通过验证
         checkAllFieldsValidated();
       }
+      console.log(canUsePage)
     }
   };
-  
-  const checkAllFieldsValidated = () => {
-    const allValidated = headerListsItems.every(item =>
-      (["OPID", "MachineID", "LineName"].includes(item.headertitle) && item.isDisabled) ||
-      !["OPID", "MachineID", "LineName"].includes(item.headertitle)
-    );
-    setCanUsePage(allValidated);
-  };
+
+const lockInput = (id, headertitle) => {
+  setHeaderListsItems(items =>
+    items.map(item => item.id === id ? { ...item, isDisabled: true } : item)
+  );
+  setMessages(prev => [...prev, `${headertitle} 验证通过。`]);
+  checkAllFieldsValidated();
+};
+
+
+const checkAllFieldsValidated = () => {
+  // 首先检查OPID, MachineID, LineName是否被正确锁定
+  const essentialFieldsValidated = headerListsItems.every(item => 
+    ["OPID", "MachineID", "LineName"].includes(item.headertitle) ? item.isDisabled : true
+  );
+
+  // 检查SN字段长度是否为14
+  const snValidated = headerListsItems.find(item => item.headertitle === "SN").headervalue.length === 14;
+
+  // 最终验证结果
+  const allValidated = essentialFieldsValidated && snValidated;
+
+  console.log("All fields validated: ", allValidated);  // 输出验证结果以便调试
+  setCanUsePage(allValidated);
+};
 
   const getShowInfo = (data) => {
-    // console.log(data, "data");
+   
     // 將OPID、MachineID、LineName的input設為disabled，但ProductName、PCBID的input不變
     setHeaderListsItems((headerListsItems) =>
       headerListsItems.map((headerListsItem) =>
