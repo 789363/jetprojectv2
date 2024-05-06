@@ -87,7 +87,7 @@ const fetchUserModels = (opId) => {
 
 // 新增ModalName的事件
 const addModalName = () => {
-  const modelName = prompt("请输入新模型名称:");
+  const modelName = prompt("Input New Modal Name");
   if (modelName) {
     fetch('http://localhost:3000/api/modules', {
       method: 'POST',
@@ -99,7 +99,7 @@ const addModalName = () => {
     .then(response => response.json())
     .then(data => {
       if (data) { // 确保数据有效
-        alert('模型添加成功!');
+        alert('Modal Create  Success!');
         setModelListsItems(prevItems => [...prevItems, { modelId: data.id, modelName: modelName }]); // 假设后端返回的 data 包含 id
         setActiveModel({ modelId: data.id, modelName: modelName }); // 设置新添加的模型为当前活跃模型
       } else {
@@ -108,15 +108,13 @@ const addModalName = () => {
     })
     .catch(error => {
       console.error('添加模型失败:', error);
-      alert('添加模型失败');
+      alert('Modal Create Fail');
     });
   }
 };
 
-
-
   // 編輯ModalName的事件
-  const editModalName = (id) => {
+const editModalName = (id) => {
     const newModelName = prompt("Input New Modal Name:");
     if (newModelName) {
       fetch(`http://localhost:3000/api/modules/${id}`, {
@@ -148,12 +146,9 @@ const addModalName = () => {
       });
     }
   };
-  
-  
-  
 
   // 刪除ModalName的事件
-  const deleteModalName = (id) => {
+const deleteModalName = (id) => {
     if (window.confirm("Are You Sure Whant Delete This Modal?")) {
       fetch(`http://localhost:3000/api/modules/${id}`, {
         method: 'DELETE'
@@ -202,7 +197,9 @@ const addModalName = () => {
 )}
             </div>
             <div style={{ height: "25%", display: "flex", flexDirection: "column", justifyContent: "space-between", marginLeft: "-10px", paddingBottom: "10px" }}>
-            <button type="button" className="btn btn-info" style={buttonStyle} onClick={()=>addModalName()} >Add Modal</button>
+            {who === "manage" && (
+  <button type="button" className="btn btn-info" style={buttonStyle} onClick={addModalName}>Add Modal</button>
+)}
               <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => toggleShowSet(false)}>Exit edit mode</button>
               <RoleSwitchButton who={who} onSwitch={handleCanEditOPIDButtonClick} style={buttonStyle} />
             </div>
@@ -212,7 +209,6 @@ const addModalName = () => {
         <div className="col" style={{ height: "100%", backgroundColor: "#DDE3EC", padding: "20px" }}>
         
   {activeModel && (
-   
     <Accordion defaultActiveKey="0">
       <Accordion.Item eventKey="0">
         <Accordion.Header >Check List Edit</Accordion.Header>
