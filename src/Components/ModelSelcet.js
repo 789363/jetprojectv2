@@ -52,22 +52,35 @@ const ModelPage = (pros) => {
         setCheckLists([]);
     }
 }, [selectModel]);
+useEffect(() => {
+  // 將數據發送到父組件，每次 checkLists 更新時觸發
+  sendDataToParent(checkLists.map(item => ({
+      name: `${item.id}. ${item.text}`,
+      result: item.status,
+      status: item.status === "FAIL" ? "FAIL" : "PASS"
+  })));
+}, [checkLists,selectAllValue]);  // 依賴 checkLists 更新
 
   // 處理checkList狀態選擇下拉選單變化
   const handleStatusChange = (checklistId, newStatus) => {
-    setCheckLists(
-      checkLists.map((item) =>
+    setCheckLists(checkLists.map((item) =>
         item.id === checklistId || item.checked
-          ? {
-              ...item,
-              status: newStatus,
-              selectedReason: newStatus === "FAIL" ? item.reasons[0] : "NA",
-              disabledReason: newStatus !== "FAIL",
+            ? {
+                ...item,
+                status: newStatus,
+                selectedReason: newStatus === "FAIL" ? item.reasons[0] : "NA",
+                disabledReason: newStatus !== "FAIL",
             }
-          : item
-      )
-    );
-  };
+            : item
+    ));
+
+    // 在状态更新后调用，向父组件发送修改后的列表
+    sendDataToParent(checkLists.map(item => ({
+        name: `${item.id}. ${item.text}`,
+        result: item.status,
+        status: item.status === "FAIL" ? "FAIL" : "PASS"
+    })));
+};
 
   const updateCheckLists = (newStatus) => {
     const newList = checkLists.map(item => ({
@@ -79,15 +92,13 @@ const ModelPage = (pros) => {
   
     // 将数据包装成指定格式的对象
     const formattedList = newList.map(item => ({
-      name: item.text,
-      result: newStatus,
-      status: newStatus === "FAIL" ? "FAIL" : "PASS"
+      name: `${item.id}. ${item.text}`, // 前面加上序号和描述
+      result: newStatus, // 根据全选下拉选单的选择，设定结果
+      status: newStatus === "FAIL" ? "FAIL" : "PASS" // 状态根据全选下拉选单的选择设定
     }));
-    console.log(formattedList)
-    // 将数据传递给父组件
-    sendDataToParent(formattedList);
+    console.log(formattedList); // 打印到控制台或发送给父组件
+    sendDataToParent(formattedList); // 将数据传递给父组件
   };
-
   // 處理checkList原因選擇下拉選單變化
   const handleReasonChange = (checklistId, newReason) => {
     setCheckLists(
@@ -96,7 +107,6 @@ const ModelPage = (pros) => {
       )
     );
   };
-
   // 處理單個複選框變化
   const handleCheckboxChange = (checklistId) => {
     setCheckLists(
@@ -105,35 +115,35 @@ const ModelPage = (pros) => {
       )
     );
   };
-
   // 處理全選複選框變化
-  const handleSelectAllChange = (e) => {
+const handleSelectAllChange = (e) => {
     const newChecked = e.target.checked;
     setSelectAll(newChecked);
-    setCheckLists(
-      checkLists.map((item) => ({
+    setCheckLists(checkLists.map(item => ({
         ...item,
         checked: newChecked,
-      }))
-    );
-  };
+    })));
 
+    // 更新完全选后，将数据发送到父组件
+    sendDataToParent(checkLists.map(item => ({
+        name: `${item.id}. ${item.text}`,
+        result: item.status,
+        status: item.status === "FAIL" ? "FAIL" : "PASS"
+    })));
+};
   // 處理全選下拉選單變化
   const handleSelectAllDropdownChange = (e) => {
     const newStatus = e.target.value;
     setSelectAllValue(newStatus);
-    setCheckLists(
-      checkLists.map((item) => ({
+    setCheckLists(checkLists.map(item => ({
         ...item,
         status: newStatus,
         selectedReason: newStatus === "FAIL" ? item.reasons[0] : "NA",
         disabledReason: newStatus !== "FAIL",
         checked: selectAll ? true : item.checked,
-      }))
-    );
- 
-    updateCheckLists(newStatus);
-  };
+    })));
+    // 不需要再這裡調用 sendDataToParent，useEffect 會處理
+};
 
   return (
     <div

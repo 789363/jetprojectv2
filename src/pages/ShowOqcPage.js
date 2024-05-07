@@ -4,19 +4,19 @@ import "../components/ModelSelcet";
 import ModelPage from "../components/ModelSelcet";
 
 const Show = (pros) => {
-
   const {headerListsItems, toggleShowSet, enteredOPID } = pros;
   console.log(pros)
+
+  
   //針對checkList(操作員要做什麼事情)的動作
   const [modelListsItems, setModelListsItems] = useState([]);
   // 選擇哪個model的下拉式選單
   const [selectModel, setSelectModel] = useState(0);
-
   //針對測量項目的動作
   const [measureListItems, setMeasureListItems] = useState([]);
   const [startTestTime, setStartTestTime] = useState("");
   const [endTestTime, setEndTestTime] = useState("");
-
+  const [checkListData, setCheckListData] = useState([]);
   useEffect(() => {
     const now = new Date();
     setStartTestTime(formatDateTime(now)); // 設置測試開始時間
@@ -43,8 +43,6 @@ const Show = (pros) => {
   const formatDateTime = (date) => {
     return `${date.getFullYear()}-${("0" + (date.getMonth() + 1)).slice(-2)}-${("0" + date.getDate()).slice(-2)} ${("0" + date.getHours()).slice(-2)}:${("0" + date.getMinutes()).slice(-2)}:${("0" + date.getSeconds()).slice(-2)}`;
   };
-
-
   //   輸入測量結果時，測量結果是否合格會自動判斷
   const handleMeasureResultChange = (id, newResult) => {
     setMeasureListItems(
@@ -60,24 +58,20 @@ const Show = (pros) => {
       )
     );
   };
-
   // 按下Edit按鈕的事件
   const handleEditButtonClick = () => {
     toggleShowSet(true);
   };
-
+  
   // selectModel的下拉式選單
   const handleSelectModelChange = async (e) => {
     const selectedModelId = Number(e.target.value);
-    console.log("Selected Model ID:", selectedModelId);
     setSelectModel(selectedModelId);
-
     // 如果选择了‘请选择模型’选项，清空测量项
     if (selectedModelId === 0) {
         setMeasureListItems([]);  // 清空项
         return;  // 提前退出函数
     }
-
     // 调用后端API获取测试项
     try {
         const response = await fetch(`http://localhost:3000/api/items/${selectedModelId}`);
@@ -85,7 +79,6 @@ const Show = (pros) => {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const items = await response.json();
-  
         setMeasureListItems(items.map(item => ({
             id: item.item_id, // 保持一致性，使用 item_id 而不是 id
             text: item.item_name, // 确保字段名称匹配
@@ -98,13 +91,10 @@ const Show = (pros) => {
         })));
     } catch (error) {
         console.error('Failed to fetch measure items:', error);
-      
         alert('No exist measure items ');  // 提供给用户的反馈
        
     }
 };
-
-
 
   // 按下Send按鈕的事件
   const handleSendButtonClick = () => {
@@ -112,6 +102,19 @@ const Show = (pros) => {
     setEndTestTime(formatDateTime(now)); // 设置测试结束时间
      // 获取 PCBWO 的值
     const PCBWOValue = document.querySelector('#pcbwoSelect').value;
+      // 處理測量項目數據
+      const measurements = measureListItems.map(item => ({
+        name: item.text, // 測試項目名稱
+        result: item.measureResult || 'NA', // 如果測試結果為空，則顯示 'NA'
+        status: item.measureResult ? item.measureResultIsPass : 'NA' // 如果測試結果為空，狀態為 'NA'
+      }));
+
+      
+
+       // 检查任何测试项或检查列表数据是否包含状态为 'FAIL'
+     // 检查任何测试项或检查列表数据是否包含状态为 'FAIL' 或 'NG'
+     const anyFail = measurements.concat(checkListData).some(item => item.status === 'FAIL' || item.status === 'NG');
+    console.log(anyFail)
     // 生成 API 需要的数据格式
     const preparedData = {
       guid: `LINE${headerListsItems.find(item => item.headertitle === "LineName").headervalue}${formatDateTime(now).replace(/[- :]/g, '')}${headerListsItems.find(item => item.headertitle === "MachineID").headervalue}`,
@@ -120,15 +123,16 @@ const Show = (pros) => {
       machineID: headerListsItems.find(item => item.headertitle === "MachineID").headervalue,
       startTestTime,
       endTestTime,
-      status: 'FAIL', // 这应根据实际情况动态设置
+      status: anyFail ? 'FAIL' : 'PASS', // 这应根据实际情况动态设置 ->只要TestItems有一項是fali 就為fali
       program: headerListsItems.find(item => item.headertitle === "Program").headervalue,
       productName: 'OQC_CHECKLIST',//productName
       pcbid:  headerListsItems.find(item => item.headertitle === "SN").headervalue,
       PCBWO: PCBWOValue,
       
       measurement: [
-        { name: 'PCBWO', result: PCBWOValue, status: PCBWOValue === 'NA' ? 'NA' : 'PASS' }, // PCBWO 的数据
-       
+        ...measurements, // 將測試項目數據包含進來
+        { name: 'PCBWO', result: PCBWOValue, status: PCBWOValue === 'NA' ? 'NA' : 'PASS' }, // PCBWO 的數據
+        ...checkListData
       ],
     };
 
@@ -149,8 +153,8 @@ const Show = (pros) => {
   };
 
   const handleDataFromModal = (data) => {
-    // 这里处理从 ModalPage 传递过来的数据
     console.log("Received data from ModalPage:", data);
+    setCheckListData(data); // 保存数据到状态
   };
   
   return (
@@ -326,26 +330,26 @@ const Show = (pros) => {
             }}
           >
             <div style={{ margin: "10px" }}>PCBWO</div>
-            <div style={{ margin: "10px" }}>
-              <select style={{ borderRadius: "5px" }}>
-                <option value="NA">NA</option>
-                <option value="OK">OK</option>
-                <option value="NG">NG</option>
-              </select>
-            </div>
-            <div style={{ width: "70%" }}>
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Remember to enter a note..."
-                style={{
-                  fontStyle: "italic",
-                  color: "gray",
-                  margin: "10px",
-                  width: "100%",
-                }}
-              />
-            </div>
+<div style={{ margin: "10px" }}>
+  <select id="pcbwoSelect" style={{ borderRadius: "5px" }}>
+    <option value="NA">NA</option>
+    <option value="OK">OK</option>
+    <option value="NG">NG</option>
+  </select>
+</div>
+<div style={{ width: "70%" }}>
+  <input
+    type="text"
+    class="form-control"
+    placeholder="Remember to enter a note..."
+    style={{
+      fontStyle: "italic",
+      color: "gray",
+      margin: "10px",
+      width: "100%",
+    }}
+  />
+</div>
           </div>
           {/* 如果Model沒有被選擇的情況，button就不能被按 */}
           <button
