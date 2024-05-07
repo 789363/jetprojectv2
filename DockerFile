@@ -1,29 +1,26 @@
-# 使用官方 Node.js 作為基礎鏡像
+# 使用 node 的官方镜像作为基础镜像
 FROM node:latest
 
-# 設置容器內的工作目錄
+# 设置容器内的工作目录
 WORKDIR /app
 
-# 將 package.json 和 package-lock.json（如果有的話）複製到容器中
+# 复制 package.json 和 package-lock.json（如果存在）文件到工作目录
 COPY package*.json ./
 
-# 安裝項目依賴
+# 安装项目依赖
 RUN npm install
 
-# 將本地代碼複製到容器內
+# 复制剩余的前端源代码到工作目录
 COPY . .
 
-# 構建應用程序（適用於 React, Vue, Angular 等）
+# 构建应用
 RUN npm run build
 
-# 使用 nginx 作為 web 服務器
-FROM nginx:alpine
+# 安装一个简单的 HTTP 服务器来服务静态文件
+RUN npm install -g serve
 
-# 從構建階段複製構建產物到 nginx 目錄
-COPY --from=0 /app/build /usr/share/nginx/html
+# 设置容器对外暴露的端口号
+EXPOSE 3001
 
-# 暴露 80 端口
-EXPOSE 80
-
-# 啟動 nginx
-CMD ["nginx", "-g", "daemon off;"]
+# 运行 HTTP 服务器
+CMD ["serve", "-s", "build", "-l", "3001"]

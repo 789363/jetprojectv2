@@ -5,6 +5,7 @@ import TestListEdit from "../components/SetOqcPage/TestListEdit";
 import RoleSwitchButton from "../components/SetOqcPage/RoleSwitchButton"
 import OpIdManager from '../components/SetOqcPage/OpIdManager';
 import { Accordion } from 'react-bootstrap';
+import * as XLSX from 'xlsx';
 const Set = (props) => {
   const { toggleShowSet, enteredOPID } = props;
   const [modelListsItems, setModelListsItems] = useState([]);
@@ -12,6 +13,8 @@ const Set = (props) => {
   const [who, setWho] = useState("user");
   const [activeModel, setActiveModel] = useState(null);
   const [showEditOPID, setEditOPID] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState('');
+
   useEffect(() => {
     // Fetching OP info to determine user role
     fetch(`http://localhost:3000/api/ops/${enteredOPID}`)
@@ -50,8 +53,6 @@ const Set = (props) => {
       .catch(error => console.error('Error fetching all models:', error));
   };
  
-  
-
 const fetchUserModels = (opId) => {
     fetch(`http://localhost:3000/api/setmodules/${enteredOPID}`)
       .then(response => response.json())
@@ -112,6 +113,47 @@ const addModalName = () => {
     });
   }
 };
+
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) {
+    alert('Please select a file.');
+    return;
+  }
+
+  setUploadStatus('Uploading...'); // 設置上傳狀態為上傳中
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, {type: 'array'});
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const json = XLSX.utils.sheet_to_json(worksheet);
+    Promise.all(json.map(item => addOpName(item.OPID)))
+      .then(() => {
+        setUploadStatus('Upload Successful');
+      })
+      .catch(error => {
+        console.error('Upload Failed:', error);
+        setUploadStatus('Upload Failed. Click to retry.'); // 設置上傳狀態為失敗
+      });
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+
+function addOpName(opId) {
+  fetch(`http://localhost:3000/api/ops/${opId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ op_id: opId })
+  })
+  .then(response => response.json())
+  .then(data => console.log('Success:', data))
+  .catch(error => console.error('Error:', error));
+}
 
   // 編輯ModalName的事件
 const editModalName = (id) => {
@@ -199,6 +241,19 @@ const deleteModalName = (id) => {
             <div style={{ height: "25%", display: "flex", flexDirection: "column", justifyContent: "space-between", marginLeft: "-10px", paddingBottom: "10px" }}>
             {who === "manage" && (
   <button type="button" className="btn btn-info" style={buttonStyle} onClick={addModalName}>Add Modal</button>
+  
+)}
+ {who === "manage" && (
+  <>
+  <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => document.getElementById('file-upload').click()}>
+              {uploadStatus || 'Add Op'}
+            </button>
+            <input type="file" id="file-upload" style={{ display: 'none' }} onChange={handleFileUpload} />
+            {uploadStatus === 'Upload Failed. Click to retry.' && (
+              <button type="button" className="btn btn-warning" onClick={() => document.getElementById('file-upload').click()}>Retry Upload</button>
+            )}
+</>
+  
 )}
               <button type="button" className="btn btn-info" style={buttonStyle} onClick={() => toggleShowSet(false)}>Exit edit mode</button>
               <RoleSwitchButton who={who} onSwitch={handleCanEditOPIDButtonClick} style={buttonStyle} />
