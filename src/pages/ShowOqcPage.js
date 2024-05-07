@@ -42,7 +42,7 @@ const Show = (pros) => {
   }, [enteredOPID]);
   const formatDateTime = (date) => {
     return `${date.getFullYear()}-${("0" + (date.getMonth() + 1)).slice(-2)}-${("0" + date.getDate()).slice(-2)} ${("0" + date.getHours()).slice(-2)}:${("0" + date.getMinutes()).slice(-2)}:${("0" + date.getSeconds()).slice(-2)}`;
-  };
+};
   //   輸入測量結果時，測量結果是否合格會自動判斷
   const handleMeasureResultChange = (id, newResult) => {
     setMeasureListItems(
@@ -58,21 +58,25 @@ const Show = (pros) => {
       )
     );
   };
+  
   // 按下Edit按鈕的事件
   const handleEditButtonClick = () => {
     toggleShowSet(true);
   };
   
   // selectModel的下拉式選單
-  const handleSelectModelChange = async (e) => {
+const handleSelectModelChange = async (e) => {
     const selectedModelId = Number(e.target.value);
     setSelectModel(selectedModelId);
-    // 如果选择了‘请选择模型’选项，清空测量项
+
+    // 设置测试开始时间
+    setStartTestTime(formatDateTime(new Date()));  // 使用当前时间作为开始时间
+
     if (selectedModelId === 0) {
         setMeasureListItems([]);  // 清空项
         return;  // 提前退出函数
     }
-    // 调用后端API获取测试项
+
     try {
         const response = await fetch(`http://localhost:3000/api/items/${selectedModelId}`);
         if (!response.ok) {
@@ -80,26 +84,27 @@ const Show = (pros) => {
         }
         const items = await response.json();
         setMeasureListItems(items.map(item => ({
-            id: item.item_id, // 保持一致性，使用 item_id 而不是 id
-            text: item.item_name, // 确保字段名称匹配
+            id: item.item_id,
+            text: item.item_name,
             USL: item.USL,
             CL: item.CL,
             LSL: item.LSL,
-            Unit: item.unit.replace(/\"/g, ''), // 去除额外的引号
+            Unit: item.unit.replace(/\"/g, ''),
             measureResult: "",
             measureResultIsPass: ""
         })));
     } catch (error) {
         console.error('Failed to fetch measure items:', error);
         alert('No exist measure items ');  // 提供给用户的反馈
-       
     }
 };
+
 
   // 按下Send按鈕的事件
   const handleSendButtonClick = () => {
     const now = new Date();
-    setEndTestTime(formatDateTime(now)); // 设置测试结束时间
+    setEndTestTime(formatDateTime(new Date()));
+    
      // 获取 PCBWO 的值
     const PCBWOValue = document.querySelector('#pcbwoSelect').value;
       // 處理測量項目數據
@@ -109,12 +114,9 @@ const Show = (pros) => {
         status: item.measureResult ? item.measureResultIsPass : 'NA' // 如果測試結果為空，狀態為 'NA'
       }));
 
-      
 
-       // 检查任何测试项或检查列表数据是否包含状态为 'FAIL'
      // 检查任何测试项或检查列表数据是否包含状态为 'FAIL' 或 'NG'
      const anyFail = measurements.concat(checkListData).some(item => item.status === 'FAIL' || item.status === 'NG');
-    console.log(anyFail)
     // 生成 API 需要的数据格式
     const preparedData = {
       guid: `LINE${headerListsItems.find(item => item.headertitle === "LineName").headervalue}${formatDateTime(now).replace(/[- :]/g, '')}${headerListsItems.find(item => item.headertitle === "MachineID").headervalue}`,
