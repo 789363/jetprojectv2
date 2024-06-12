@@ -101,8 +101,8 @@ const addModalName = () => {
     .then(data => {
       if (data) { // 确保数据有效
         alert('Modal Create  Success!');
-        setModelListsItems(prevItems => [...prevItems, { modelId: data.id, modelName: modelName }]); // 假设后端返回的 data 包含 id
-        setActiveModel({ modelId: data.id, modelName: modelName }); // 设置新添加的模型为当前活跃模型
+        setModelListsItems(prevItems => [...prevItems, { modelId: data.module_id, modelName: modelName }]); // 假设后端返回的 data 包含 id
+        setActiveModel({ modelId: data.module_id, modelName: modelName }); // 设置新添加的模型为当前活跃模型
       } else {
         throw new Error('Invalid response data'); // 处理无效数据
       }
