@@ -47,9 +47,12 @@ const TestItems = ({ selectModel }) => {
     if (!editingItem) return;
     try {
       const updateData = {
-        item_name: editingItem.testItem, // 只更新item_name
-        unit: editingItem.Unit,          // 只更新unit
-        module_id:selectModel ,
+        item_name: editingItem.testItem,
+        unit: editingItem.Unit,
+        USL: editingItem.USL,
+        CL: editingItem.CL,
+        LSL: editingItem.LSL,
+        module_id: selectModel,
       }
 
       const response = await fetch(`http://localhost:3000/api/items/${editingItem.id}`, {
