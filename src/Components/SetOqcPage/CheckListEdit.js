@@ -6,15 +6,11 @@ import EditCheckListItemModal from './CheckListEdit/EditCheckListItemModal';
 const SetModelPage = (props) => {
   const {
     selectModel,
-    who,
-    createNewModelVersion,
-    modelListsItems,
-    setModelListsItems,
+
   } = props;
   console.log(props)
   
   const [checkLists, setCheckLists] = useState([]);
-  const [opIds, setOpIds] = useState([]); // 新状态用于存储OPID列表
   
 // Fetch test items based on the modelId
 useEffect(() => {
@@ -140,9 +136,10 @@ const handleDelete = async (itemId) => {
       try {
         const response = await fetch(`http://localhost:3000/api/checkitems/${selectModel}`);
         const data = await response.json();
-        const formattedData = data.map(item => ({
+        const formattedData = data.map((item, index) => ({
           ...item,
-          reasons: item.reasons.map((reason, index) => ({ id: index, description: reason }))
+          displayId: index + 1,
+          reasons: item.reasons.map((reason, reasonIndex) => ({ id: reasonIndex, description: reason }))
         }));
         setCheckLists(formattedData);
       } catch (error) {
@@ -188,9 +185,9 @@ return (
     <div className="model-checklist-div">
       {checkLists.map((item) => (
         <div key={item.id} className="model-checklist-body-each-div">
-          <div className="model-checklist-body-each-text-div">
-            {item.id}. {item.text}
-          </div>
+     <div className="model-checklist-body-each-text-div">
+  {item.displayId}. {item.text}
+</div>
           <div style={{ width: "15%", display: "flex", justifyContent: "center" }}>
             <select style={{ borderRadius: "5px", marginRight: "10px" }} value={item.status} onChange={(e) => handleStatusChange(e, item.id)}>
               <option value="NA">NA</option>
