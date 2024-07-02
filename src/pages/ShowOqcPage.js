@@ -138,7 +138,7 @@ const handleSelectModelChange = async (e) => {
       ],
     };
 
-    fetch("http://localhost:3002/api/JETAPI/OQCUpload", {
+    fetch("http://10.7.21.251:5072/api/JETAPI/OQCUpload", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
