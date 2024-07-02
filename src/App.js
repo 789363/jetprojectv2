@@ -187,15 +187,14 @@ const checkAllFieldsValidated = () => {
     >
       <div class="row" className="AllHeaderDiv">
         <div className="HeaderDiv">
-          <select
-            class="form-control"
+                  <input
+            type="text"
+            className="form-control"
             style={{ width: "200px" }}
             value={systemName}
-            onChange={(e) => getSystemName(e.target.value)}
-          >
-            <option value="OQC">OQC</option>
-            <option value="VRM">VRM</option>
-          </select>
+            onChange={(e) => setSystemName(e.target.value.toUpperCase())}
+            placeholder="Type OQC or VRM"
+          />
           {systemName === "OQC" ? (
             <div
               style={{
