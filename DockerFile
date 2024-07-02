@@ -1,20 +1,20 @@
-# 選擇帶有 Node.js 的基礎映像
+# 选择带有 Node.js 的基础映像
 FROM node:16
 
-# 設定工作目錄
+# 设置工作目录
 WORKDIR /app
 
-# 複製 package.json 和 package-lock.json（如果存在）
+# 复制 package.json 和 package-lock.json（如果存在）
 COPY package*.json ./
 
-# 安裝項目依賴
+# 安装项目依赖
 RUN npm install
 
-# 複製項目文件到容器中
+# 复制项目文件到容器中
 COPY . .
 
-# 指定運行時的端口
-EXPOSE 3001
+# 指定运行时的端口，这里需要暴露两个端口
+EXPOSE 3001 3002
 
-# 使用 npm run start 啟動應用
+# 使用 npm run start 启动应用
 CMD ["npm", "run", "start"]
